@@ -41,7 +41,7 @@ class SqlBuilder extends Nette\Object
 
 	/** @var array of where conditions */
 	protected $where = array();
-	
+
 	/** @var array of left join conditions */
 	protected $left = array();
 
@@ -172,7 +172,9 @@ class SqlBuilder extends Nette\Object
 	public function importConditions(SqlBuilder $builder)
 	{
 		$this->where = $builder->where;
+		$this->left = $builder->left;
 		$this->parameters['where'] = $builder->parameters['where'];
+		$this->parameters['left'] = $builder->parameters['left'];
 		$this->conditions = $builder->conditions;
 	}
 
@@ -464,7 +466,7 @@ class SqlBuilder extends Nette\Object
 			if(isset($leftConditions[$joinAlias]) && count($leftConditions[$joinAlias])){
 				$additionalConditions = ' AND (' . $leftConditions[$joinAlias] . ')';
 			}
-			
+
 			$return .=
 				" LEFT JOIN {$joinTable}" . ($joinTable !== $joinAlias ? " AS {$joinAlias}" : '') .
 				" ON {$table}.{$tableColumn} = {$joinAlias}.{$joinColumn}{$additionalConditions}";
@@ -494,16 +496,18 @@ class SqlBuilder extends Nette\Object
 		}
 		return $return;
 	}
-	
+
 	protected function createLeftJoinConditions() {
 		return implode(',', $this->left);
 	}
-	
+
 	protected function buildLeftJoinConditions($allLeftJoinConditions) {
 		$conditions = array();
 		foreach(explode(',', $allLeftJoinConditions) as $condition){
 			$condition = Strings::trim($condition);
 			$table = Strings::replace($condition, '~\..*$~');
+			$table = Strings::replace($table, '~^.* ~');
+			$table = Strings::replace($table, '~^.*\(~');
 			if(!isset($conditions[$table])){
 				$conditions[$table] = $condition;
 			}else{
