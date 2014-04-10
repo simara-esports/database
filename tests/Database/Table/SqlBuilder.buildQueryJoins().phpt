@@ -35,9 +35,11 @@ $reflection = new DiscoveredReflection($connection);
 $sqlBuilder = new SqlBuilderMock('nUsers', $connection, $reflection);
 
 $joins = array();
-$leftJoin = ':nusers_ntopics.topic.priorit.id IS NOT NULL, :nusers_ntopics.topic.priorit.id = ?';
-$sqlBuilder->parseJoins($joins, $leftJoin);
-$leftConditions = $sqlBuilder->buildLeftJoinConditions($leftJoin);
+$leftJoins = array(':nusers_ntopics.topic.priorit.id IS NOT NULL', ':nusers_ntopics.topic.priorit.id = ?');
+foreach($leftJoins as &$oneLeft){
+	$sqlBuilder->parseJoins($joins, $oneLeft);
+}
+$leftConditions = $sqlBuilder->buildLeftJoinConditions($leftJoins);
 $join = $sqlBuilder->buildQueryJoins($joins, $leftConditions);
 Assert::same('priorit.id IS NOT NULL AND priorit.id = ?', $leftConditions['priorit']);
 
@@ -67,7 +69,7 @@ $sqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
 $joins = array();
 $leftJoin = ':book(translator).next_volume = ? OR :book(translator).next_volume IS NULL';
 $sqlBuilder->parseJoins($joins, $leftJoin);
-$leftConditions = $sqlBuilder->buildLeftJoinConditions($leftJoin);
+$leftConditions = $sqlBuilder->buildLeftJoinConditions(array($leftJoin));
 $join = $sqlBuilder->buildQueryJoins($joins, $leftConditions);
 Assert::same('book.next_volume = ? OR book.next_volume IS NULL', $leftConditions['book']);
 Assert::same(

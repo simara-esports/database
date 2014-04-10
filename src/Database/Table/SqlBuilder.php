@@ -116,12 +116,13 @@ class SqlBuilder extends Nette\Object
 	{
 		$queryCondition = $this->buildConditions();
 		$queryEnd       = $this->buildQueryEnd();
-		$leftConditions = $this->createLeftJoinConditions();
 
 		$joins = array();
 		$this->parseJoins($joins, $queryCondition);
 		$this->parseJoins($joins, $queryEnd);
-		$this->parseJoins($joins, $leftConditions);
+		foreach($this->left as &$leftCondition){
+			$this->parseJoins($joins, $leftCondition);
+		}
 
 		if ($this->select) {
 			$querySelect = $this->buildSelect($this->select);
@@ -145,7 +146,7 @@ class SqlBuilder extends Nette\Object
 
 		}
 
-		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($leftConditions));
+		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($this->left));
 		$query = "{$querySelect} FROM {$this->tableName}{$queryJoins}{$queryCondition}{$queryEnd}";
 
 		if ($this->limit !== NULL || $this->offset) {
@@ -507,7 +508,7 @@ class SqlBuilder extends Nette\Object
 
 	protected function buildLeftJoinConditions($allLeftJoinConditions) {
 		$conditions = array();
-		foreach(explode(',', $allLeftJoinConditions) as $condition){
+		foreach($allLeftJoinConditions as $condition){
 			$condition = Strings::trim($condition);
 			$table = Strings::replace($condition, '~\..*$~');
 			$table = Strings::replace($table, '~^.* ~');
