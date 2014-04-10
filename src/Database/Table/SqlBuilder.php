@@ -404,7 +404,7 @@ class SqlBuilder extends Nette\Object
 		$query = preg_replace_callback('~
 			(?(DEFINE)
 				(?P<word> [a-z][\w_]* )
-				(?P<del> [.:] )
+				(?P<del> [.:!] )
 				(?P<node> (?&del)? (?&word) (\((?&word)\))? )
 			)
 			(?P<chain> (?!\.) (?&node)*)  \. (?P<column> (?&word) | \*  )
@@ -416,6 +416,10 @@ class SqlBuilder extends Nette\Object
 
 	public function parseJoinsCb(& $joins, $match)
 	{
+		if($match[0][0] == '!'){
+			return substr($match[0], 1);
+		}
+
 		$chain = $match['chain'];
 		if (!empty($chain[0]) && ($chain[0] !== '.' || $chain[0] !== ':')) {
 			$chain = '.' . $chain;  // unified chain format
