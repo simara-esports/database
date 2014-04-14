@@ -29,51 +29,58 @@ class SqlBuilderMock extends SqlBuilder
 
 $reflection = new DiscoveredReflection($connection);
 
-$authorSqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+test(function() use ($connection, $reflection){
+	$authorSqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+	$authorSqlBuilder->addAlias(':book(translator)', 'bok');
+	
+	Assert::exception(function() use ($authorSqlBuilder){
+		$authorSqlBuilder->addAlias(':book', 'bok');
+	}, '\Nette\InvalidArgumentException');
 
-$joins = array();
-$authorSqlBuilder->addAlias(':book(translator)', 'bok');
-$authorSqlBuilder->addAlias(':book:book_tag', 'bok2');
+	Assert::exception(function() use ($authorSqlBuilder){
+		$joins = array();
+		$query = 'WHERE :bok.next_volume';
+		$authorSqlBuilder->parseJoins($joins, $query);
+	}, '\Nette\InvalidArgumentException');
 
-Assert::exception(function() use ($authorSqlBuilder){
-	$authorSqlBuilder->addAlias(':book', 'bok');
-}, '\Nette\InvalidArgumentException');
+	Assert::exception(function() use ($authorSqlBuilder){
+		$authorSqlBuilder->addAlias('bok.book', 'bokxxx');
+	}, '\Nette\InvalidArgumentException');
+	
+});
 
-Assert::exception(function() use ($authorSqlBuilder){
+test(function() use ($connection, $reflection){
+	$authorSqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
 	$joins = array();
-	$query = 'WHERE :bok.next_volume';
+	$authorSqlBuilder->addAlias(':book(translator)', 'bok');
+	$authorSqlBuilder->addAlias(':book:book_tag', 'bok2');
+
+	$query = 'WHERE bok.next_volume IS NULL OR bok2.x IS NULL OR bok2.tag.x IS NULL';
 	$authorSqlBuilder->parseJoins($joins, $query);
-}, '\Nette\InvalidArgumentException');
 
-Assert::exception(function() use ($authorSqlBuilder){
-	$authorSqlBuilder->addAlias('bok.book', 'bokxxx');
-}, '\Nette\InvalidArgumentException');
-
-$query = 'WHERE bok.next_volume IS NULL OR bok2.x IS NULL OR bok2.tag.x IS NULL';
-$authorSqlBuilder->parseJoins($joins, $query);
-
-$join = $authorSqlBuilder->buildQueryJoins($joins);
-Assert::same(
-	'LEFT JOIN book AS bok ON author.id = bok.translator_id LEFT JOIN book ON author.id = book.author_id'
-	. ' LEFT JOIN book_tag AS bok2 ON book.id = bok2.book_id LEFT JOIN tag ON bok2.tag_id = tag.id',
-	trim($join)
-);
+	$join = $authorSqlBuilder->buildQueryJoins($joins);
+	Assert::same(
+		'LEFT JOIN book AS bok ON author.id = bok.translator_id LEFT JOIN book ON author.id = book.author_id'
+		. ' LEFT JOIN book_tag AS bok2 ON book.id = bok2.book_id LEFT JOIN tag ON bok2.tag_id = tag.id',
+		trim($join)
+	);
+});
 
 
-
-$bookJoins = array();
-$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
-$bookSqlBuilder->addAlias('author', 'aut');
-$bookSqlBuilder->addAlias('author:book(translator)', 'trans');
-$bookQuery = "WHERE aut.name LIKE '%abc%' OR aut:book.id IS NOT NULL OR trans.id IS NOT NULL";
-$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
-$join = $authorSqlBuilder->buildQueryJoins($bookJoins);
-var_dump($join);
-Assert::same(
-	'LEFT JOIN author AS aut ON book.author_id = aut.id'
-	. ' LEFT JOIN book ON aut.id = book.author_id'
-	. ' LEFT JOIN author ON book.author_id = author.id'
-	. ' LEFT JOIN book AS trans ON author.id = trans.translator_id',
-	trim($join)
-);
-
+test(function() use ($connection, $reflection){
+	$bookJoins = array();
+	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder->addAlias('author', 'aut');
+	$bookSqlBuilder->addAlias('author:book(translator)', 'trans');
+	$bookQuery = "WHERE aut.name LIKE '%abc%' OR aut:book.id IS NOT NULL OR trans.id IS NOT NULL";
+	$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
+	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
+	var_dump($join);
+	Assert::same(
+		'LEFT JOIN author AS aut ON book.author_id = aut.id'
+		. ' LEFT JOIN book ON aut.id = book.author_id'
+		. ' LEFT JOIN author ON book.author_id = author.id'
+		. ' LEFT JOIN book AS trans ON author.id = trans.translator_id',
+		trim($join)
+	);
+});
