@@ -427,6 +427,18 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 		call_user_func_array(array($this->sqlBuilder, 'setHaving'), func_get_args());
 		return $this;
 	}
+	
+	/**
+	 * Alias table
+	 * @example ':book:book_tag.tag', 'tg'
+	 * @param string $table
+	 * @param string $alias
+	 * @return self
+	 */
+	public function alias($table, $alias) {
+		$this->sqlBuilder->addAlias($table, $alias);
+		return $this;
+	}
 
 
 	/********************* aggregations ****************d*g**/
