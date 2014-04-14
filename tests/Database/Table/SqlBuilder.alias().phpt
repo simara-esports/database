@@ -32,7 +32,7 @@ $reflection = new DiscoveredReflection($connection);
 test(function() use ($connection, $reflection){
 	$authorSqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
 	$authorSqlBuilder->addAlias(':book(translator)', 'bok');
-	
+
 	Assert::exception(function() use ($authorSqlBuilder){
 		$authorSqlBuilder->addAlias(':book', 'bok');
 	}, '\Nette\InvalidArgumentException');
@@ -46,7 +46,7 @@ test(function() use ($connection, $reflection){
 	Assert::exception(function() use ($authorSqlBuilder){
 		$authorSqlBuilder->addAlias('bok.book', 'bokxxx');
 	}, '\Nette\InvalidArgumentException');
-	
+
 });
 
 test(function() use ($connection, $reflection){
@@ -75,12 +75,31 @@ test(function() use ($connection, $reflection){
 	$bookQuery = "WHERE aut.name LIKE '%abc%' OR aut:book.id IS NOT NULL OR trans.id IS NOT NULL";
 	$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
 	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
-	var_dump($join);
 	Assert::same(
 		'LEFT JOIN author AS aut ON book.author_id = aut.id'
 		. ' LEFT JOIN book ON aut.id = book.author_id'
 		. ' LEFT JOIN author ON book.author_id = author.id'
 		. ' LEFT JOIN book AS trans ON author.id = trans.translator_id',
+		trim($join)
+	);
+});
+
+test(function() use ($connection, $reflection){
+	$bookJoins = array();
+
+	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder->addAlias(':book_tag.tag:book_tag_alt.book', 'book2');
+
+	$bookQuery = "WHERE book2.id IS NOT NULL";
+	$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
+
+	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
+
+	Assert::same(
+		'LEFT JOIN book_tag ON book.id = book_tag.book_id'
+		. ' LEFT JOIN tag ON book_tag.tag_id = tag.id'
+		. ' LEFT JOIN book_tag_alt ON tag.id = book_tag_alt.tag_id'
+		. ' LEFT JOIN book AS book2 ON book_tag_alt.book_id = book2.id',
 		trim($join)
 	);
 });
