@@ -68,3 +68,13 @@ test(function() use ($context){
 		. ' LEFT JOIN [product_price] AS [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ? AND [pp].[value] > ?)'
 		. ' WHERE ([t].[name] LIKE ?)'), $sql);
 });
+
+test(function() use ($context){
+	$count = $context
+		->table('book')
+		->alias(':product_price', 'pp')
+		->left('pp.active', 1)
+		->select('book.*, pp.value')
+		->count('book.id');
+	Assert::same(4, $count);
+});

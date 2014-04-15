@@ -72,7 +72,7 @@ class SqlBuilder extends Nette\Object
 
 	/** @var string grouping condition */
 	protected $having = '';
-	
+
 	protected $aliases = array();
 
 
@@ -179,6 +179,7 @@ class SqlBuilder extends Nette\Object
 		$this->parameters['where'] = $builder->parameters['where'];
 		$this->parameters['left'] = $builder->parameters['left'];
 		$this->conditions = $builder->conditions;
+		$this->aliases = $builder->aliases;
 	}
 
 
@@ -326,9 +327,9 @@ class SqlBuilder extends Nette\Object
 		$this->{$method}[] = $condition;
 		return TRUE;
 	}
-	
+
 	/**
-	 * Add alias 
+	 * Add alias
 	 * @param string $table
 	 * @param string $alias
 	 * @throws \Nette\InvalidArgumentException
@@ -338,7 +339,7 @@ class SqlBuilder extends Nette\Object
 			throw new \Nette\InvalidArgumentException("Alias '$alias' is already used");
 		}
 		$this->aliases[$alias] = $table;
-		
+
 		foreach (array_keys($this->aliases) as $oldAlias) {
 			foreach(Strings::split($table, '~[.:]~') as $part){
 				if(!$part){
@@ -480,7 +481,7 @@ class SqlBuilder extends Nette\Object
 					$joins[$key] = $join;
 				}
 				list($table, , $parentAlias, $column, $primary) = $aliasJoin;
-				
+
 			}else{
 				if ($keyMatch['del'] === ':') {
 					if (isset($keyMatch['throughColumn'])) {
@@ -495,7 +496,7 @@ class SqlBuilder extends Nette\Object
 					$primary = $this->databaseReflection->getPrimary($table);
 				}
 			}
-			
+
 			$addon = $keyMatch['key'] . (isset($keyMatch['throughColumn']) ? $keyMatch['throughColumn'] : '');
 			$joins[$table . $addon . $column] = array($table, $keyMatch['key'] ?: $table, $parentAlias, $column, $primary);
 			$parent = $table;
