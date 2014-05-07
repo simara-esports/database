@@ -340,7 +340,7 @@ class SqlBuilder extends Nette\Object
 		}
 		$this->aliases[$alias] = $table;
 
-		foreach (array_keys($this->aliases) as $oldAlias) {
+		/*foreach (array_keys($this->aliases) as $oldAlias) {
 			foreach(Strings::split($table, '~[.:]~') as $part){
 				if(!$part){
 					continue;
@@ -349,7 +349,7 @@ class SqlBuilder extends Nette\Object
 					throw new \Nette\InvalidArgumentException("Alias definition cannot contain another alias. Trying to use '$part'");
 				}
 			}
-		}
+		}*/
 	}
 
 

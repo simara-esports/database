@@ -43,10 +43,6 @@ test(function() use ($connection, $reflection){
 		$authorSqlBuilder->parseJoins($joins, $query);
 	}, '\Nette\InvalidArgumentException');
 
-	Assert::exception(function() use ($authorSqlBuilder){
-		$authorSqlBuilder->addAlias('bok.book', 'bokxxx');
-	}, '\Nette\InvalidArgumentException');
-
 });
 
 test(function() use ($connection, $reflection){
@@ -100,6 +96,56 @@ test(function() use ($connection, $reflection){
 		. ' LEFT JOIN tag ON book_tag.tag_id = tag.id'
 		. ' LEFT JOIN book_tag_alt ON tag.id = book_tag_alt.tag_id'
 		. ' LEFT JOIN book AS book2 ON book_tag_alt.book_id = book2.id',
+		trim($join)
+	);
+});
+
+test(function() use ($connection, $reflection){
+	$bookJoins = array();
+
+	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder->addAlias(':book_tag.tag', 'tagAlias');
+	$bookSqlBuilder->addAlias(':book_tag.tag', 'tag2Alias');
+	$bookSqlBuilder->addAlias('tagAlias:book_tag_alt', 'btaAlias');
+	$bookSqlBuilder->addAlias('tag2Alias:book_tag_alt', 'bta2Alias');
+	$bookSqlBuilder->addAlias('btaAlias.book', 'bookAlias');
+	$bookSqlBuilder->addAlias('bta2Alias.book', 'book2Alias');
+
+	$bookQuery = "WHERE btaAlias.statte='public' AND bta2Alias.state='private' AND (bookAlias.id IS NOT NULL OR book2Alias.id IS NOT NULL)";
+	$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
+
+	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
+
+	Assert::same(
+		'LEFT JOIN book_tag ON book.id = book_tag.book_id'
+			. ' LEFT JOIN tag AS tagAlias ON book_tag.tag_id = tagAlias.id'
+			. ' LEFT JOIN book_tag_alt AS btaAlias ON tagAlias.id = btaAlias.tag_id'
+			. ' LEFT JOIN tag AS tag2Alias ON book_tag.tag_id = tag2Alias.id'
+			. ' LEFT JOIN book_tag_alt AS bta2Alias ON tag2Alias.id = bta2Alias.tag_id'
+			. ' LEFT JOIN book AS bookAlias ON btaAlias.book_id = bookAlias.id'
+			. ' LEFT JOIN book AS book2Alias ON bta2Alias.book_id = book2Alias.id',
+		trim($join)
+	);
+});
+
+test(function() use ($connection, $reflection){
+	$bookJoins = array();
+
+	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder->addAlias(':book_tag', 'btAlias');
+	$bookSqlBuilder->addAlias('btAlias.tag:book_tag_alt', 'btaAlias');
+	$bookSqlBuilder->addAlias('btaAlias.book', 'bookAlias');
+
+	$bookQuery = "WHERE btaAlias.statte='public' AND bookAlias.id IS NOT NULL";
+	$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
+
+	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
+
+	Assert::same(
+		'LEFT JOIN book_tag AS btAlias ON book.id = btAlias.book_id'
+			. ' LEFT JOIN tag ON btAlias.tag_id = tag.id'
+			. ' LEFT JOIN book_tag_alt AS btaAlias ON tag.id = btaAlias.tag_id'
+			. ' LEFT JOIN book AS bookAlias ON btaAlias.book_id = bookAlias.id',
 		trim($join)
 	);
 });
