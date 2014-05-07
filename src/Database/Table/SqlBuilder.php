@@ -339,17 +339,6 @@ class SqlBuilder extends Nette\Object
 			throw new \Nette\InvalidArgumentException("Alias '$alias' is already used");
 		}
 		$this->aliases[$alias] = $table;
-
-		/*foreach (array_keys($this->aliases) as $oldAlias) {
-			foreach(Strings::split($table, '~[.:]~') as $part){
-				if(!$part){
-					continue;
-				}
-				if($oldAlias == $part){
-					throw new \Nette\InvalidArgumentException("Alias definition cannot contain another alias. Trying to use '$part'");
-				}
-			}
-		}*/
 	}
 
 
