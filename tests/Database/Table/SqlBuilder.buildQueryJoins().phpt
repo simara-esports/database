@@ -76,3 +76,13 @@ Assert::same(
 	'LEFT JOIN book ON author.id = book.translator_id AND (book.next_volume = ? OR book.next_volume IS NULL)',
 	trim($join)
 );
+
+
+
+$sqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+
+$joins = array();
+$leftJoin = "5 IS NOT NULL OR 5 = 3";
+$sqlBuilder->parseJoins($joins, $leftJoin);
+$leftConditions = $sqlBuilder->buildLeftJoinConditions(array($leftJoin));
+Assert::same(array(), $leftConditions);

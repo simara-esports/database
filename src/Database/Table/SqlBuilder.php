@@ -544,6 +544,9 @@ class SqlBuilder extends Nette\Object
 	protected function buildLeftJoinConditions($allLeftJoinConditions) {
 		$conditions = array();
 		foreach($allLeftJoinConditions as $condition){
+			if(strpos($condition, '.') === false){
+				continue;
+			}
 			$condition = Strings::trim($condition);
 			$table = Strings::replace($condition, '~\..*$~');
 			$table = Strings::replace($table, '~^.* ~');
