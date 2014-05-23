@@ -23,15 +23,15 @@ class Helpers
 
 	/** @var array */
 	public static $typePatterns = array(
-		'^_' => IReflection::FIELD_TEXT, // PostgreSQL arrays
-		'BYTEA|BLOB|BIN' => IReflection::FIELD_BINARY,
-		'TEXT|CHAR|POINT|INTERVAL' => IReflection::FIELD_TEXT,
-		'YEAR|BYTE|COUNTER|SERIAL|INT|LONG|SHORT|^TINY$' => IReflection::FIELD_INTEGER,
-		'CURRENCY|REAL|MONEY|FLOAT|DOUBLE|DECIMAL|NUMERIC|NUMBER' => IReflection::FIELD_FLOAT,
-		'^TIME$' => IReflection::FIELD_TIME,
-		'TIME' => IReflection::FIELD_DATETIME, // DATETIME, TIMESTAMP
-		'DATE' => IReflection::FIELD_DATE,
-		'BOOL' => IReflection::FIELD_BOOL,
+		'^_' => IStructure::FIELD_TEXT, // PostgreSQL arrays
+		'BYTEA|BLOB|BIN' => IStructure::FIELD_BINARY,
+		'TEXT|CHAR|POINT|INTERVAL' => IStructure::FIELD_TEXT,
+		'YEAR|BYTE|COUNTER|SERIAL|INT|LONG|SHORT|^TINY$' => IStructure::FIELD_INTEGER,
+		'CURRENCY|REAL|MONEY|FLOAT|DOUBLE|DECIMAL|NUMERIC|NUMBER' => IStructure::FIELD_FLOAT,
+		'^TIME$' => IStructure::FIELD_TIME,
+		'TIME' => IStructure::FIELD_DATETIME, // DATETIME, TIMESTAMP
+		'DATE' => IStructure::FIELD_DATE,
+		'BOOL' => IStructure::FIELD_BOOL,
 	);
 
 
@@ -87,7 +87,7 @@ class Helpers
 		$sql = preg_replace("#(?<=[\\s,(])($keywords1)(?=[\\s,)])#i", "\n\$1", $sql);
 
 		// reduce spaces
-		$sql = preg_replace('#[ \t]{2,}#', " ", $sql);
+		$sql = preg_replace('#[ \t]{2,}#', ' ', $sql);
 
 		$sql = wordwrap($sql, 100);
 		$sql = preg_replace('#([ \t]*\r?\n){2,}#', "\n", $sql);
@@ -127,7 +127,7 @@ class Helpers
 				if ($type === 'stream') {
 					$info = stream_get_meta_data($param);
 				}
-				return '<i' . (isset($info['uri']) ? ' title="' . htmlspecialchars($info['uri']) . '"' : NULL) . '>&lt;' . htmlSpecialChars($type) . " resource&gt;</i> ";
+				return '<i' . (isset($info['uri']) ? ' title="' . htmlspecialchars($info['uri']) . '"' : NULL) . '>&lt;' . htmlSpecialChars($type) . ' resource&gt;</i> ';
 
 			} else {
 				return htmlspecialchars($param);

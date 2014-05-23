@@ -8,7 +8,7 @@
  */
 
 use Tester\Assert;
-use Nette\Database\Reflection\DiscoveredReflection;
+use Nette\Database\Conventions\DiscoveredConventions;
 use Nette\Database\Table\SqlBuilder;
 
 require __DIR__ . '/../connect.inc.php'; // create $connection
@@ -31,7 +31,7 @@ class SqlBuilderMock extends SqlBuilder
 	}
 }
 
-$reflection = new DiscoveredReflection($connection);
+$reflection = new DiscoveredConventions($structure);
 $sqlBuilder = new SqlBuilderMock('nUsers', $connection, $reflection);
 
 $joins = array();

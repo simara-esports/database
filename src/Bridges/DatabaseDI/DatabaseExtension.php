@@ -27,7 +27,8 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 		'options' => NULL,
 		'debugger' => TRUE,
 		'explain' => TRUE,
-		'reflection' => 'Nette\Database\Reflection\DiscoveredReflection',
+		'reflection' => NULL, // BC
+		'conventions' => 'Nette\Database\Conventions\DiscoveredConventions',
 		'autowired' => NULL,
 	);
 
@@ -35,12 +36,16 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 	public function loadConfiguration()
 	{
 		$container = $this->getContainerBuilder();
-		$this->setupDatabase($container, $this->getConfig());
-	}
 
+		$config = $this->compiler->getConfig();
+		if (isset($config['nette']['database'])) { // back compatibility
+			$config = $config['nette']['database'];
+			$prefix = 'nette.';
+		} else {
+			$config = isset($config[$this->name]) ? $config[$this->name] : array();
+			$prefix = '';
+		}
 
-	private function setupDatabase(ContainerBuilder $container, array $config)
-	{
 		if (isset($config['dsn'])) {
 			$config = array('default' => $config);
 		}
@@ -62,41 +67,51 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 				}
 			}
 
-			$connection = $container->addDefinition($this->prefix("$name"))
+			$connection = $container->addDefinition($prefix . $this->prefix($name))
 				->setClass('Nette\Database\Connection', array($info['dsn'], $info['user'], $info['password'], $info['options']))
 				->setAutowired($info['autowired'])
-				->addSetup('Nette\Diagnostics\Debugger::getBlueScreen()->addPanel(?)', array(
+				->addSetup('Tracy\Debugger::getBlueScreen()->addPanel(?)', array(
 					'Nette\Bridges\DatabaseTracy\ConnectionPanel::renderException'
 				));
 
-			if (!$info['reflection']) {
-				$reflection = NULL;
-			} elseif (is_string($info['reflection'])) {
-				$reflection = new Nette\DI\Statement(preg_match('#^[a-z]+\z#', $info['reflection'])
-					? 'Nette\Database\Reflection\\' . ucfirst($info['reflection']) . 'Reflection'
-					: $info['reflection'], strtolower($info['reflection']) === 'discovered' ? array($connection) : array());
+			$structure = $container->addDefinition($prefix . $this->prefix("$name.structure"))
+				->setClass('Nette\Database\Structure')
+				->setArguments(array($connection));
+
+			if (!empty($info['reflection'])) {
+				$conventionsServiceName = 'reflection';
+				$info['conventions'] = $info['reflection'];
+				if (strtolower($info['conventions']) === 'conventional') {
+					$info['conventions'] = 'Static';
+				}
 			} else {
-				$tmp = Nette\DI\Compiler::filterArguments(array($info['reflection']));
-				$reflection = reset($tmp);
+				$conventionsServiceName = 'conventions';
 			}
 
-			$container->addDefinition($this->prefix("$name.context"))
-				->setClass('Nette\Database\Context', array($connection, $reflection))
+			if (!$info['conventions']) {
+				$conventions = NULL;
+
+			} elseif (is_string($info['conventions'])) {
+				$conventions = $container->addDefinition($prefix . $this->prefix("$name.$conventionsServiceName"))
+					->setClass(preg_match('#^[a-z]+\z#', $info['conventions'])
+						? 'Nette\Database\Conventions\\' . ucfirst($info['conventions']) . 'Conventions'
+						: $info['conventions'])
+					->setArguments(strtolower($info['conventions']) === 'discovered' ? array($structure) : array())
+					->setAutowired($info['autowired']);
+
+			} else {
+				$tmp = Nette\DI\Compiler::filterArguments(array($info['conventions']));
+				$conventions = reset($tmp);
+			}
+
+			$container->addDefinition($prefix . $this->prefix("$name.context"))
+				->setClass('Nette\Database\Context', array($connection, $structure, $conventions))
 				->setAutowired($info['autowired']);
 
 			if ($container->parameters['debugMode'] && $info['debugger']) {
 				$connection->addSetup('Nette\Database\Helpers::createDebugPanel', array($connection, !empty($info['explain']), $name));
 			}
 		}
-	}
-
-
-	public function getConfig(array $defaults = NULL)
-	{
-		$config = $this->compiler->getConfig();
-		$config = isset($config[$this->name]) ? $config[$this->name] : (isset($config['nette']['database']) ? $config['nette']['database'] : array());
-		unset($config['services'], $config['factories']);
-		return Nette\DI\Config\Helpers::merge($config, $this->compiler->getContainerBuilder()->expand($defaults));
 	}
 
 

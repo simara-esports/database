@@ -9,10 +9,10 @@ namespace Nette\Database\Table;
 
 use Nette,
 	Nette\Database\Connection,
-	Nette\Database\IReflection,
 	Nette\Database\ISupplementalDriver,
 	Nette\Database\SqlLiteral,
-	Nette\Utils\Strings;
+	Nette\Utils\Strings,
+	Nette\Database\IConventions;
 
 
 /**
@@ -24,14 +24,14 @@ use Nette,
  */
 class SqlBuilder extends Nette\Object
 {
-	/** @var Nette\Database\ISupplementalDriver */
+	/** @var ISupplementalDriver */
 	private $driver;
 
 	/** @var string */
 	protected $tableName;
 
-	/** @var IReflection */
-	protected $databaseReflection;
+	/** @var IConventions */
+	protected $conventions;
 
 	/** @var string delimited table name */
 	protected $delimitedTable;
@@ -76,12 +76,22 @@ class SqlBuilder extends Nette\Object
 	protected $aliases = array();
 
 
-	public function __construct($tableName, Connection $connection, IReflection $reflection)
+	public function __construct($tableName, Connection $connection, IConventions $conventions)
 	{
 		$this->tableName = $tableName;
-		$this->databaseReflection = $reflection;
 		$this->driver = $connection->getSupplementalDriver();
+		$this->conventions = $conventions;
+
 		$this->delimitedTable = $this->tryDelimite($tableName);
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getTableName()
+	{
+		return $this->tableName;
 	}
 
 
@@ -472,17 +482,31 @@ class SqlBuilder extends Nette\Object
 				list($table, , $parentAlias, $column, $primary) = $aliasJoin;
 
 			}else{
-				if ($keyMatch['del'] === ':') {
-					if (isset($keyMatch['throughColumn'])) {
-							$table = $keyMatch['key'];
-							list(, $primary) = $this->databaseReflection->getBelongsToReference($table, $keyMatch['throughColumn']);
-					} else {
-							list($table, $primary) = $this->databaseReflection->getHasManyReference($parent, $keyMatch['key']);
+			if ($keyMatch['del'] === ':') {
+				if (isset($keyMatch['throughColumn'])) {
+					$table = $keyMatch['key'];
+					$belongsTo = $this->conventions->getBelongsToReference($table, $keyMatch['throughColumn']);
+					if (!$belongsTo) {
+						throw new Nette\InvalidArgumentException("No reference found for \${$parent}->{$keyMatch['key']}.");
 					}
-							$column = $this->databaseReflection->getPrimary($parent);
+					list(, $primary) = $belongsTo;
+
 				} else {
-					list($table, $column) = $this->databaseReflection->getBelongsToReference($parent, $keyMatch['key']);
-					$primary = $this->databaseReflection->getPrimary($table);
+					$hasMany = $this->conventions->getHasManyReference($parent, $keyMatch['key']);
+					if (!$hasMany) {
+						throw new Nette\InvalidArgumentException("No reference found for \${$parent}->related({$keyMatch['key']}).");
+					}
+					list($table, $primary) = $hasMany;
+				}
+				$column = $this->conventions->getPrimary($parent);
+
+			} else {
+				$belongsTo = $this->conventions->getBelongsToReference($parent, $keyMatch['key']);
+				if (!$belongsTo) {
+					throw new Nette\InvalidArgumentException("No reference found for \${$parent}->{$keyMatch['key']}.");
+				}
+				list($table, $column) = $belongsTo;
+				$primary = $this->conventions->getPrimary($table);
 				}
 			}
 
