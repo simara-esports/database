@@ -424,7 +424,6 @@ class SqlBuilder extends Nette\Object
 		return 'SELECT ' . implode(', ', $columns);
 	}
 
-
 	protected function parseJoins(& $joins, & $query)
 	{
 		$builder = $this;
@@ -440,6 +439,29 @@ class SqlBuilder extends Nette\Object
 		}, $query);
 	}
 
+	/**
+	 * Rozparsuje jeden alias, prida joiny do $joins
+	 * 
+	 * @param array $joins
+	 * @param string $aliasKey klic v poli $this->aliases
+	 * @param string $aliasDelimiter
+	 * @return array
+	 * @throws \Nette\InvalidArgumentException
+	 */
+	protected function parseAlias(& $joins, $aliasKey, $aliasDelimiter) {
+		if($aliasDelimiter !== '.'){
+			throw new \Nette\InvalidArgumentException("Bad syntax when using alias. There cannot be ':$aliasKey...', must be '$aliasKey...'");
+		}
+		$query = $aliasDelimiter . $this->aliases[$aliasKey] . ".x";
+		$tmp = array();
+		$this->parseJoins($tmp, $query);
+		$aliasJoin = end($tmp);
+		array_pop($tmp);
+		foreach($tmp as $key => $join){
+			$joins[$key] = $join;
+		}
+		return $aliasJoin;
+	}
 
 	public function parseJoinsCb(& $joins, $match)
 	{
@@ -466,48 +488,35 @@ class SqlBuilder extends Nette\Object
 
 		foreach ($keyMatches as $keyMatch) {
 			if(isset($this->aliases[$keyMatch['key']])){
-				$aliasKey = $keyMatch['key'];
-				if($keyMatch['del'] !== '.'){
-					throw new \Nette\InvalidArgumentException("Bad syntax when using alias. There cannot be ':$aliasKey...', must be '$aliasKey...'");
-				}
-				$alias = $this->aliases[$aliasKey];
-				$query = $keyMatch['del'] . $alias . ".x";
-				$tmp = array();
-				$this->parseJoins($tmp, $query);
-				$aliasJoin = end($tmp);
-				array_pop($tmp);
-				foreach($tmp as $key => $join){
-					$joins[$key] = $join;
-				}
+				$aliasJoin = $this->parseAlias($joins, $keyMatch['key'], $keyMatch['del']);
 				list($table, , $parentAlias, $column, $primary) = $aliasJoin;
-
 			}else{
-			if ($keyMatch['del'] === ':') {
-				if (isset($keyMatch['throughColumn'])) {
-					$table = $keyMatch['key'];
-					$belongsTo = $this->conventions->getBelongsToReference($table, $keyMatch['throughColumn']);
+				if ($keyMatch['del'] === ':') {
+					if (isset($keyMatch['throughColumn'])) {
+						$table = $keyMatch['key'];
+						$belongsTo = $this->conventions->getBelongsToReference($table, $keyMatch['throughColumn']);
+						if (!$belongsTo) {
+							throw new Nette\InvalidArgumentException("No reference found for \${$parent}->{$keyMatch['key']}.");
+						}
+						list(, $primary) = $belongsTo;
+
+					} else {
+						$hasMany = $this->conventions->getHasManyReference($parent, $keyMatch['key']);
+						if (!$hasMany) {
+							throw new Nette\InvalidArgumentException("No reference found for \${$parent}->related({$keyMatch['key']}).");
+						}
+						list($table, $primary) = $hasMany;
+					}
+					$column = $this->conventions->getPrimary($parent);
+
+				} else {
+					$belongsTo = $this->conventions->getBelongsToReference($parent, $keyMatch['key']);
 					if (!$belongsTo) {
 						throw new Nette\InvalidArgumentException("No reference found for \${$parent}->{$keyMatch['key']}.");
 					}
-					list(, $primary) = $belongsTo;
-
-				} else {
-					$hasMany = $this->conventions->getHasManyReference($parent, $keyMatch['key']);
-					if (!$hasMany) {
-						throw new Nette\InvalidArgumentException("No reference found for \${$parent}->related({$keyMatch['key']}).");
+					list($table, $column) = $belongsTo;
+					$primary = $this->conventions->getPrimary($table);
 					}
-					list($table, $primary) = $hasMany;
-				}
-				$column = $this->conventions->getPrimary($parent);
-
-			} else {
-				$belongsTo = $this->conventions->getBelongsToReference($parent, $keyMatch['key']);
-				if (!$belongsTo) {
-					throw new Nette\InvalidArgumentException("No reference found for \${$parent}->{$keyMatch['key']}.");
-				}
-				list($table, $column) = $belongsTo;
-				$primary = $this->conventions->getPrimary($table);
-				}
 			}
 
 			$addon = $keyMatch['key'] . (isset($keyMatch['throughColumn']) ? $keyMatch['throughColumn'] : '');
