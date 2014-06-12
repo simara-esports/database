@@ -128,11 +128,12 @@ class SqlBuilder extends Nette\Object
 	{
 		$queryCondition = $this->buildConditions();
 		$queryEnd       = $this->buildQueryEnd();
+		$leftConditions = $this->left;
 
 		$joins = array();
 		$this->parseJoins($joins, $queryCondition);
 		$this->parseJoins($joins, $queryEnd);
-		foreach($this->left as &$leftCondition){
+		foreach($leftConditions as &$leftCondition){
 			$this->parseJoins($joins, $leftCondition);
 		}
 
@@ -158,7 +159,7 @@ class SqlBuilder extends Nette\Object
 
 		}
 
-		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($this->left));
+		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($leftConditions));
 		$query = "{$querySelect} FROM {$this->tableName}{$queryJoins}{$queryCondition}{$queryEnd}";
 
 		if ($this->limit !== NULL || $this->offset) {
@@ -568,10 +569,6 @@ class SqlBuilder extends Nette\Object
 			$return .= ' ORDER BY ' . implode(', ', $this->order);
 		}
 		return $return;
-	}
-
-	protected function createLeftJoinConditions() {
-		return implode(',', $this->left);
 	}
 
 	protected function buildLeftJoinConditions($allLeftJoinConditions) {
