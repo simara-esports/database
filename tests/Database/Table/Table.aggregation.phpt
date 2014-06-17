@@ -53,6 +53,7 @@ test(function() use ($context, $prepareAggregation){
 		->where('book.name LIKE', 'PHP')
 		->left('pp.value > ?', 0)
 		->left(':book_tag.tag_id IS NOT NULL');
+	$table->removeLefts();
 	$selection = $prepareAggregation->invoke($table, 'COUNT(*)');
 	$sql = $selection->getSql();
 	Assert::same(reformat(
@@ -68,6 +69,7 @@ test(function() use ($context, $prepareAggregation){
 		->where('author.name LIKE', 'ja')
 		->left('pp.value > ?', 0)
 		->left(':book_tag.tag_id IS NOT NULL');
+	$table->removeLefts();
 	$selection = $prepareAggregation->invoke($table, 'COUNT(*)');
 	$sql = $selection->getSql();
 	Assert::same(reformat(

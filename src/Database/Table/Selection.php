@@ -362,6 +362,13 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 		array_unshift($args, 'left');
 		return call_user_func_array($this->condition, $args);
 	}
+	
+	/**
+	 * Remove all left conditions
+	 */
+	public function removeLefts() {
+		$this->sqlBuilder->removeLeftConditions();
+	}
 
 
 	/**
@@ -449,7 +456,6 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 	protected function prepareAggregation($function) {
 		$selection = $this->createSelectionInstance();
 		$selection->getSqlBuilder()->importConditions($this->getSqlBuilder());
-		$selection->sqlBuilder->removeLeftConditions();
 		$selection->select($function);
 		return $selection;
 	}
