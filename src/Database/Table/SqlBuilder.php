@@ -158,7 +158,7 @@ class SqlBuilder extends Nette\Object
 			$querySelect = $this->buildSelect(array($prefix . '*'));
 
 		}
-
+		
 		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($leftConditions));
 		$query = "{$querySelect} FROM {$this->tableName}{$queryJoins}{$queryCondition}{$queryEnd}";
 
@@ -231,7 +231,7 @@ class SqlBuilder extends Nette\Object
 		}
 
 		$args = func_get_args();
-		$hash = md5(json_encode($args));
+		$hash = $method . md5(json_encode($args));
 		array_shift($args);
 		if (isset($this->conditions[$hash])) {
 			return FALSE;
@@ -609,6 +609,19 @@ class SqlBuilder extends Nette\Object
 		} else {
 			return $this->addWhere('(' . implode(', ', $columns) . ') IN', $parameters);
 		}
+	}
+	
+	/**
+	 * Odstrani vsechny podminky na left join i jejich parametry
+	 */
+	public function removeLeftConditions() {
+		$this->left = array();
+		foreach(array_keys($this->conditions) as $hash){
+			if(strpos($hash, 'left') === 0){
+				unset($this->conditions[$hash]);
+			}
+		}
+		$this->parameters['left'] = array();
 	}
 
 }

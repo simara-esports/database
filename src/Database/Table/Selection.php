@@ -446,6 +446,13 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 
 	/********************* aggregations ****************d*g**/
 
+	protected function prepareAggregation($function) {
+		$selection = $this->createSelectionInstance();
+		$selection->getSqlBuilder()->importConditions($this->getSqlBuilder());
+		$selection->sqlBuilder->removeLeftConditions();
+		$selection->select($function);
+		return $selection;
+	}
 
 	/**
 	 * Executes aggregation function.
@@ -454,9 +461,7 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 	 */
 	public function aggregation($function)
 	{
-		$selection = $this->createSelectionInstance();
-		$selection->getSqlBuilder()->importConditions($this->getSqlBuilder());
-		$selection->select($function);
+		$selection = $this->prepareAggregation($function);
 		foreach ($selection->fetch() as $val) {
 			return $val;
 		}
