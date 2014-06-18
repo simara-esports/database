@@ -556,7 +556,7 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 			$row = $this->createRow($result->normalizeRow($row));
 			$primary = $row->getSignature(FALSE);
 			$usedPrimary = $usedPrimary && $primary;
-			$this->rows[$primary ?: $key] = $row;
+			$this->rows[($primary || $primary === "0" || $primary === 0) ? $primary : $key] = $row;
 		}
 		$this->data = $this->rows;
 
