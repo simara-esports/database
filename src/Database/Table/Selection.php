@@ -449,6 +449,18 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 		$this->sqlBuilder->addAlias($table, $alias);
 		return $this;
 	}
+	
+	/**
+	 * Forces SQL to use an index
+	 * @param string $indexName
+	 * @param string|null $table
+	 * @todo Second argument has no effect
+	 * @return \Nette\Database\Table\Selection
+	 */
+	public function forceIndex($indexName, $table = null) {
+		$this->sqlBuilder->setForceIndex($indexName, $table);
+		return $this;
+	}
 
 
 	/********************* aggregations ****************d*g**/

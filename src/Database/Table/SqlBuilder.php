@@ -74,6 +74,9 @@ class SqlBuilder extends Nette\Object
 	protected $having = '';
 
 	protected $aliases = array();
+	
+	/** @var array */
+	protected $forceIndexes = array();
 
 
 	public function __construct($tableName, Connection $connection, IConventions $conventions)
@@ -159,8 +162,10 @@ class SqlBuilder extends Nette\Object
 
 		}
 		
+		$forceIndex = $this->getForceIndex();
+		
 		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($leftConditions));
-		$query = "{$querySelect} FROM {$this->tableName}{$queryJoins}{$queryCondition}{$queryEnd}";
+		$query = "{$querySelect} FROM {$this->tableName}{$forceIndex}{$queryJoins}{$queryCondition}{$queryEnd}";
 
 		if ($this->limit !== NULL || $this->offset) {
 			$this->driver->applyLimit($query, $this->limit, $this->offset);
@@ -414,6 +419,24 @@ class SqlBuilder extends Nette\Object
 	public function getHaving()
 	{
 		return $this->having;
+	}
+	
+	public function setForceIndex($indexName, $table = null) {
+		if(empty($indexName)){
+			throw new \Nette\InvalidArgumentException("Index name can't be empty");
+		}
+		
+		$this->forceIndexes[$table] = $indexName;
+	}
+	
+	public function getForceIndex($table = null) {
+		if(!isset($this->forceIndexes[$table])){
+			return null;
+		}
+		
+		$index = implode(', ', (array)$this->forceIndexes[$table]);
+		
+		return " FORCE INDEX ($index)";
 	}
 
 
