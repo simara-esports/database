@@ -33,14 +33,30 @@ class ExceptionTranslator extends Object {
 	 */
 	public function translate($connection, $e) {
 		if ($e instanceof PDOException) {
-			if ($e->getCode() == '23000' && isset($e->errorInfo[1]) && $e->errorInfo[1] == 1062) {
+			$code = $e->getCode();
+			$errorCode = $this->getErrorCode($e->errorInfo);
+
+			if ($code == '23000' && $errorCode == 1062) {
 				throw new PrimaryKeyException($e->getMessage(), null, $e);
-			}
-			if ($e->getCode() == '23000' && isset($e->errorInfo[1]) && $e->errorInfo[1] == 1451) {
+			} else if ($code == '23000' && $errorCode == 1451) {
 				throw new ConstraintViolationException($e->getMessage(), null, $e);
 			}
+
 			throw new ModelException($e->getMessage(), null, $e);
 		}
+	}
+
+	/**
+	 * Chybovy kod databazove serveru
+	 * @param array
+	 * @return int|null
+	 */
+	protected function getErrorCode($errorInfo) {
+		if (!isset($errorInfo[1])) {
+			return null;
+		}
+
+		return $errorInfo[1];
 	}
 
 }
