@@ -1,7 +1,7 @@
 Nette/Esports Database
 ======================
 
-**@see [nette/database](https://github.com/nette/database) **
+@see [nette/database](https://github.com/nette/database)
 
 Rozšíření API
 
