@@ -1,118 +1,143 @@
-Nette Database
-==============
+Nette/Esports Database
+======================
 
-[![Downloads this Month](https://img.shields.io/packagist/dm/nette/database.svg)](https://packagist.org/packages/nette/database)
-[![Build Status](https://travis-ci.org/nette/database.svg?branch=master)](https://travis-ci.org/nette/database)
+**@see [nette/database](https://github.com/nette/database) **
 
-Nette provides a powerful layer for accessing your database easily.
+Rozšíření API
 
-- composes SQL queries with ease
-- easily fetches data
-- uses efficient queries and does not transmit unnecessary data
+Podmínka v LEFT JOIN
+--------------------
 
-The `Nette\Database\Connection` class is a wrapper around the PDO and represents a connection to the database.
-The core functionality is provided by `Nette\Database\Context`. `Nette\Database\Table` layer orivudes an enhanced layer for table querying.
+Podmínka je připojena k LEFT JOIN klauzuli
 
-To create a new database connection just create a new instance of [api:Nette\Database\Connection] class:
 
 ```php
-$connection = new Nette\Database\Connection($dsn, $user, $password);
+$selection = $context->table('book')
+        ->left(':product_price.active', 1)
+        ->select('book.*, :product_price.value');
 ```
-
-All connections are created as "lazy" by default. This means the connection is established when it's needed, not when you create a `Connection` instance. You can disable this behavior by passing `'lazy' => FALSE` configuration.
-
-Queries
---------
-
-The core functionality is provided by `Nette\Database\Context`. Database\Context allows you to easily query your database by calling `query` method:
-
-```php
-$database = new Nette\Database\Context($connection);
-
-$database->query('INSERT INTO users', array( // an array can be a parameter
-	'name' => 'Jim',
-	'created' => new DateTime, // or a DateTime object
-	'avatar' => fopen('image.gif', 'r'), // or a file
-), ...); // it is even possible to use multiple inserts
-
-$database->query('UPDATE users SET ? WHERE id=?', $data, $id);
-$database->query('SELECT * FROM categories WHERE id=?', 123)->dump();
-```
-
-Table Selection
----------------
-
-`Nette\Database\Table` layer helps you to fetch database data more easily and in a more optimized way. **The primary attitude is to fetch data only from one table and fetch them at once.** The data are fetched into [ActiveRow | database-activerow] instances. Data from other tables connected by relationships are delivered by another queries - this is maintained by Database\Table layer itself.
-
-Let's take a look at common use-case. You need to fetch books and their authors. It is common 1:N relationship. The often used implementation fetches data by one SQL query with table joins. The second possibility is to fetch data separately, run one query for getting books and then get an author for each book by another query (e.g. in your foreach cycle). This could be easily optimized to run only two queries, one for books, and another for the needed authors - and this is just the way how Nette\Database\Table does it.
-
-Creating Selection is quite easy, just call `table()` method on your database context.
-
-```php
-$selection = $context->table('book'); // db table name is "book"
-```
-
-Selection implements traversable interface: you can just iterate over the instance to get all books. The rows are fetched as ActiveRow instances; you can read row data from their properties.
-
-```php
-$books = $context->table('book');
-foreach ($books as $book) {
-	echo $book->title;
-	echo $book->author_id;
-}
-```
-
-Getting just one specific row is done by `get()` method. It is "filtering" method, which directly returns an ActiveRow instance.
-
-```php
-$book = $context->table('book')->get(2); // returns book with id 2
-echo $book->title;
-echo $book->author_id;
-```
-
-Working with relationships
---------------------------
-
-As we mentioned in the chapter intro, Database\Table layer maintains the table relations for you. There are two possibilities how and where you can work with relationships.
-
-1. **Filtering rows fetched by Selection.** In the introduction we stated the basic principle to select data only from one database table at once. However, Selection instance can do a table join to filter selected row. For example you need select only that authors who has written more than 2 books.
-2. **Getting related data for fetched ActiveRows.** We denied getting data from more than one table at once. Sadly, printing `author_id` is not good enough. We need to get full author database row, ideally fetched as ActiveRow. Getting this type of relationships is maintained by ActiveRow.
-
-
-In provided examples we will work with this database schema below. There are common OneHasMany and ManyHasMany relationships. OneHasMany relationship is doubled, a book must have an author and could have a translator (`translator_id` could be a `NULL`).
-
-![](http://files.nette.org/git/doc-2.1/db-schema-1-.png)
-
-In example below we are getting related data for fetched books. In author property (of book ActiveRow instances) is available another ActiveRow instance, which represents author of the book. Getting book_tag instances is done by `related()` method, which returns collection of this instances. In the cycle we get the tag name from another ActiveRow instance available in book_tag instance.
-
-```php
-$books = $context->table('book');
-
-foreach ($books as $book) {
-	echo 'title:      ' . $book->title;
-	echo 'written by: ' . $book->author->name;
-
-	echo 'tags: ';
-	foreach ($book->related('book_tag') as $bookTag) {
-		echo $bookTag->tag->name . ', ';
-	}
-}
-```
-
-You will be pleased how efficiently the database layer works. The example above performs constant number of queries, see following 4 queries:
 
 ```sql
-SELECT * FROM `book`
-SELECT * FROM `author` WHERE (`author`.`id` IN (11, 12))
-SELECT * FROM `book_tag` WHERE (`book_tag`.`book_id` IN (1, 4, 2, 3))
-SELECT * FROM `tag` WHERE (`tag`.`id` IN (21, 22, 23))
+SELECT book.*, product_price.value
+FROM book
+LEFT JOIN product_price ON book.id = product_price.book_id
+AND (product_price.active = 1)
+```
+-------------------------------------
+
+```php
+$selection = $context->table('book')
+		->left(':product_price.active', 1)
+		->where(':book_tag.tag.name LIKE', 'PHP')
+		->left(':product_price.value > ?', 0)
+		->left(':book_tag.tag_id IS NOT NULL')
+		->select('book.*, :product_price.value');
 ```
 
-If you use cache (defaults on), no columns will be queried unnecessarily. After the first query, cache will store the used column names and Nette\Database will run queries only with the needed columns:
+```sql
+SELECT book.*, product_price.value FROM book
+LEFT JOIN book_tag ON book.id = book_tag.book_id AND (book_tag.tag_id IS NOT NULL)
+LEFT JOIN tag ON book_tag.tag_id = tag.id
+LEFT JOIN product_price ON book.id = product_price.book_id AND (product_price.active = 1 AND product_price.value > 0)
+WHERE (tag.name LIKE "PHP")
+```
+-------------------------------------
+Podmínky lze libovolně míchat, jenom je třeba mít na paměti, že bude podmínka připojena k LEFT JOIN klauzuli podle prvního sloupečku v podmínce (obvykle je uveden jenom jeden, takže netřeba řešit).
+```php
+$selection = $context->table('book')
+		->left(':product_price.active', 1)
+		->left(':book_tag.tag_id IS NOT NULL OR :product_price.active IS NOT NULL') // bude pripojeno k book_tag
+		->select('book.*, :product_price.value');
+```
+```sql
+SELECT book.*, product_price.value FROM book
+LEFT JOIN product_price ON book.id = product_price.book_id AND (product_price.active = 1)
+LEFT JOIN book_tag ON book.id = book_tag.book_id AND (book_tag.tag_id IS NOT NULL OR product_price.active IS NOT NULL)
+
+```
+Aliasování
+----------
+```php
+$selection = $context
+		->table('book')
+		->alias(':product_price', 'pp')
+		->left('pp.active', 1)
+		->select('book.*, pp.value');
+```
+```sql
+SELECT book.*, pp.value
+FROM book
+LEFT JOIN product_price AS pp ON book.id = pp.book_id AND (pp.active = 1)
+```
+-------------------------------------
+```php
+$selection = $context->table('book')
+		->alias(':product_price', 'pp')
+		->left('pp.active', 1)
+		->alias(':book_tag.tag', 't')
+		->where('t.name LIKE', 'PHP')
+		->left('pp.value > ?', 0)
+		->left(':book_tag.tag_id IS NOT NULL')
+		->select('book.*, pp.value');
+```
+```sql
+SELECT book.*, pp.value FROM book
+LEFT JOIN book_tag ON book.id = book_tag.book_id AND (book_tag.tag_id IS NOT NULL)
+LEFT JOIN tag AS t ON book_tag.tag_id = t.id
+LEFT JOIN product_price AS pp ON book.id = pp.book_id AND (pp.active = 1 AND pp.value > 0)
+WHERE (t.name LIKE "PHP")
+```
+-------------------------------------
+LEFT JOIN s aliasem, ale vybira se z ne-aliasovane
+
+```php
+$selection = $context
+		->table('book')
+		->alias(':product_price', 'pp')
+		->left('pp.active', 1)
+		->select('book.*, :product_price.value');//tricky
+```
+```sql
+SELECT book.*, product_price.value
+FROM book
+LEFT JOIN product_price AS pp ON book.id = pp.book_id AND (pp.active = 1)
+LEFT JOIN product_price ON book.id = product_price.book_id
+```
+
+Vyřazení řetězce z vyhledávání
+-------------------------------
+
+Stává se, že v subselectu je třeba použít alias tabulky, a s ním pracovat. Klasická Selection se snaží tento alias dohledat, což končí chybou:
+
+```php
+...->where('author.id = (SELECT b.author_id FROM book AS b LIMIT 1)');
+```
+
+Řešením je použití vykřičníku před ```!b.author_id```, celé to vypadá:
+
+```php
+$selection = $context->table('author')
+        ->where('author.id = (SELECT !b.author_id FROM book AS b LIMIT 1)');
+```
 
 ```sql
-SELECT `id`, `title`, `author_id` FROM `book`
-SELECT `id`, `name` FROM `author` WHERE (`author`.`id` IN (11, 12))
-SELECT `book_id`, `tag_id` FROM `book_tag` WHERE (`book_tag`.`book_id` IN (1, 4, 2, 3))
-SELECT `id`, `name` FROM `tag` WHERE (`tag`.`id` IN (21, 22, 23))
+SELECT *
+FROM author
+WHERE (author.id = (SELECT b.author_id FROM book AS b LIMIT 1))
+```
+
+Force index
+-----------
+
+Stejně jako v SQL: Zajistí použití požadovaného indexu.
+
+```php
+$selection = $context->table('book')
+		->forceIndex('use_this_index')
+		->select('book.*');
+```
+
+```sql
+SELECT book.* FROM book
+FORCE INDEX (`use_this_index`)
 ```
