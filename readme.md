@@ -10,7 +10,7 @@ Podmínka v LEFT JOIN
 
 Podmínka je připojena k LEFT JOIN klauzuli
 
-```...->left()```
+``` ...->left() ```
 
 
 ```php
@@ -60,7 +60,7 @@ LEFT JOIN book_tag ON book.id = book_tag.book_id AND (book_tag.tag_id IS NOT NUL
 Aliasování
 ----------
 
-```...->alias()```
+``` ...->alias() ```
 
 ```php
 $selection = $context
@@ -136,7 +136,7 @@ Force index
 
 Stejně jako v SQL: Zajistí použití požadovaného indexu.
 
-```...->forceIndex()```
+``` ...->forceIndex() ```
 
 ```php
 $selection = $context->table('book')
