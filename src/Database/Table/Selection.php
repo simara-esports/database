@@ -63,6 +63,9 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 	/** @var string */
 	protected $generalCacheKey;
 
+	/** @var array */
+	protected $generalCacheTraceKey;
+
 	/** @var string */
 	protected $specificCacheKey;
 
@@ -97,7 +100,7 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 
 		$this->cache = $cacheStorage ? new Nette\Caching\Cache($cacheStorage, 'Nette.Database.' . md5($context->getConnection()->getDsn())) : NULL;
 		$this->primary = $conventions->getPrimary($tableName);
-		$this->sqlBuilder = new SqlBuilder($tableName, $context->getConnection(), $conventions);
+		$this->sqlBuilder = new SqlBuilder($tableName, $context);
 		$this->refCache = & $this->getRefTable($refPath)->globalRefCache[$refPath];
 	}
 
@@ -158,16 +161,7 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 	public function getPrimarySequence()
 	{
 		if ($this->primarySequence === FALSE) {
-			$this->primarySequence = NULL;
-			$driver = $this->context->getConnection()->getSupplementalDriver();
-			if ($driver->isSupported(ISupplementalDriver::SUPPORT_SEQUENCE) && $this->primary !== NULL) {
-				foreach ($this->context->getStructure()->getColumns($this->name) as $column) {
-					if ($column['name'] === $this->primary) {
-						$this->primarySequence = $column['vendor']['sequence'];
-						break;
-					}
-				}
-			}
+			$this->primarySequence = $this->context->getStructure()->getPrimaryKeySequence($this->name);
 		}
 
 		return $this->primarySequence;
@@ -610,6 +604,11 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 			$this->saveCacheState();
 		}
 
+		if ($saveCache) {
+			// null only if missing some column
+			$this->generalCacheTraceKey = NULL;
+		}
+
 		$this->rows = NULL;
 		$this->specificCacheKey = NULL;
 		$this->generalCacheKey = NULL;
@@ -664,7 +663,17 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 			return $this->generalCacheKey;
 		}
 
-		return $this->generalCacheKey = md5(serialize(array(__CLASS__, $this->name, $this->sqlBuilder->getConditions())));
+		$key = array(__CLASS__, $this->name, $this->sqlBuilder->getConditions());
+		if (!$this->generalCacheTraceKey) {
+			$trace = array();
+			foreach (debug_backtrace(PHP_VERSION_ID >= 50306 ? DEBUG_BACKTRACE_IGNORE_ARGS : FALSE) as $item) {
+				$trace[] = isset($item['file'], $item['line']) ? $item['file'] . $item['line'] : NULL;
+			};
+			$this->generalCacheTraceKey = $trace;
+		}
+
+		$key[] = $this->generalCacheTraceKey;
+		return $this->generalCacheKey = md5(serialize($key));
 	}
 
 
@@ -786,7 +795,12 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 			return $return->getRowCount();
 		}
 
-		$primaryKey = $this->context->getInsertId($this->getPrimarySequence());
+		$primarySequenceName = $this->getPrimarySequence();
+		$primaryKey = $this->context->getInsertId(
+			!empty($primarySequenceName)
+				? $this->context->getConnection()->getSupplementalDriver()->delimite($primarySequenceName)
+				: $primarySequenceName
+		);
 		if ($primaryKey === FALSE) {
 			unset($this->refCache['referencing'][$this->getGeneralCacheKey()][$this->getSpecificCacheKey()]);
 			return $return->getRowCount();

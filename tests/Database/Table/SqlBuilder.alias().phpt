@@ -27,10 +27,8 @@ class SqlBuilderMock extends SqlBuilder
 	}
 }
 
-$reflection = new DiscoveredConventions($structure);
-
-test(function() use ($connection, $reflection){
-	$authorSqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+test(function() use ($context){
+	$authorSqlBuilder = new SqlBuilderMock('author', $context);
 	$authorSqlBuilder->addAlias(':book(translator)', 'bok');
 
 	Assert::exception(function() use ($authorSqlBuilder){
@@ -45,8 +43,8 @@ test(function() use ($connection, $reflection){
 
 });
 
-test(function() use ($connection, $reflection){
-	$authorSqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+test(function() use ($context){
+	$authorSqlBuilder = new SqlBuilderMock('author', $context);
 	$joins = array();
 	$authorSqlBuilder->addAlias(':book(translator)', 'bok');
 	$authorSqlBuilder->addAlias(':book:book_tag', 'bok2');
@@ -63,9 +61,9 @@ test(function() use ($connection, $reflection){
 });
 
 
-test(function() use ($connection, $reflection){
+test(function() use ($context){
 	$bookJoins = array();
-	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder = new SqlBuilderMock('book', $context);
 	$bookSqlBuilder->addAlias('author', 'aut');
 	$bookSqlBuilder->addAlias('author:book(translator)', 'trans');
 	$bookQuery = "WHERE aut.name LIKE '%abc%' OR aut:book.id IS NOT NULL OR trans.id IS NOT NULL";
@@ -80,10 +78,10 @@ test(function() use ($connection, $reflection){
 	);
 });
 
-test(function() use ($connection, $reflection){
+test(function() use ($context){
 	$bookJoins = array();
 
-	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder = new SqlBuilderMock('book', $context);
 	$bookSqlBuilder->addAlias(':book_tag.tag:book_tag_alt.book', 'book2');
 
 	$bookQuery = "WHERE book2.id IS NOT NULL";
@@ -100,10 +98,10 @@ test(function() use ($connection, $reflection){
 	);
 });
 
-test(function() use ($connection, $reflection){
+test(function() use ($context){
 	$bookJoins = array();
 
-	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder = new SqlBuilderMock('book', $context);
 	$bookSqlBuilder->addAlias(':book_tag.tag', 'tagAlias');
 	$bookSqlBuilder->addAlias(':book_tag.tag', 'tag2Alias');
 	$bookSqlBuilder->addAlias('tagAlias:book_tag_alt', 'btaAlias');
@@ -128,10 +126,10 @@ test(function() use ($connection, $reflection){
 	);
 });
 
-test(function() use ($connection, $reflection){
+test(function() use ($context){
 	$bookJoins = array();
 
-	$bookSqlBuilder = new SqlBuilderMock('book', $connection, $reflection);
+	$bookSqlBuilder = new SqlBuilderMock('book', $context);
 	$bookSqlBuilder->addAlias(':book_tag', 'btAlias');
 	$bookSqlBuilder->addAlias('btAlias.tag:book_tag_alt', 'btaAlias');
 	$bookSqlBuilder->addAlias('btaAlias.book', 'bookAlias');

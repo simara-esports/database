@@ -15,10 +15,8 @@ require __DIR__ . '/../connect.inc.php'; // create $connection
 
 Nette\Database\Helpers::loadFromFile($connection, __DIR__ . "/../files/{$driverName}-nette_test1.sql");
 
-$reflection = new DiscoveredConventions($structure);
-
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->setForceIndex('nameOfTheForceIndex');
 		$query = $builder->buildSelectQuery();
@@ -26,8 +24,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->addWhere('id', 5);
 		$builder->setForceIndex('nameOfTheForceIndex');
@@ -36,8 +34,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->addOrder('id');
 		$builder->setForceIndex('nameOfTheForceIndex');
@@ -46,8 +44,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->setGroup('id');
 		$builder->setForceIndex('nameOfTheForceIndex');
@@ -56,8 +54,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->setGroup('id');
 		$builder->setHaving('id > 5');
@@ -68,8 +66,8 @@ test(function() use ($connection, $reflection){
 );
 
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->setForceIndex('nameOfTheForceIndex, nameOfAnothorOne');
 		$query = $builder->buildSelectQuery();
@@ -77,8 +75,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->setForceIndex('nameOfTheForceIndex,nameOfAnothorOne');
 		$query = $builder->buildSelectQuery();
@@ -86,8 +84,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		$builder->setForceIndex(['nameOfTheForceIndex', 'nameOfAnothorOne']);
 		$query = $builder->buildSelectQuery();
@@ -95,8 +93,8 @@ test(function() use ($connection, $reflection){
 	}
 );
 
-test(function() use ($connection, $reflection){
-		$builder = new \Nette\Database\Table\SqlBuilder('author', $connection, $reflection);
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
 		Assert::exception(function() use ($builder){
 			$builder->setForceIndex([]);

@@ -31,8 +31,7 @@ class SqlBuilderMock extends SqlBuilder
 	}
 }
 
-$reflection = new DiscoveredConventions($structure);
-$sqlBuilder = new SqlBuilderMock('nUsers', $connection, $reflection);
+$sqlBuilder = new SqlBuilderMock('nUsers', $context);
 
 $joins = array();
 $leftJoins = array(':nusers_ntopics.topic.priorit.id IS NOT NULL', ':nusers_ntopics.topic.priorit.id = ?');
@@ -64,7 +63,7 @@ if (!in_array($tables[0]['name'], array('npriorities', 'ntopics', 'nusers', 'nus
 
 Nette\Database\Helpers::loadFromFile($connection, __DIR__ . "/../files/{$driverName}-nette_test1.sql");
 
-$sqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+$sqlBuilder = new SqlBuilderMock('author', $context);
 
 $joins = array();
 $leftJoin = ':book(translator).next_volume = ? OR :book(translator).next_volume IS NULL';
@@ -79,7 +78,7 @@ Assert::same(
 
 
 
-$sqlBuilder = new SqlBuilderMock('author', $connection, $reflection);
+$sqlBuilder = new SqlBuilderMock('author', $context);
 
 $joins = array();
 $leftJoin = "5 IS NOT NULL OR 5 = 3";
