@@ -528,14 +528,18 @@ class SqlBuilder extends Nette\Object
 				$keyMatch = array_shift($keyMatches);
 				$parentAlias = $keyMatches[0]['key'];
 				$keyMatches[0]['key'] = $keyMatch['key'] . '.' . $keyMatches[0]['key'];
+				$keyMatches[0]['del'] = $keyMatch['del'];
 			}
 		}
 
-		// do not make a join when referencing to the current table column
-		if ($parent === $keyMatches[0]['key']) {
-			return "{$parent}.{$match['column']}";
-		} elseif ($parentAlias === $keyMatches[0]['key']) {
-			return "{$parentAlias}.{$match['column']}";
+		// do not make a join when referencing to the current table column - inner conditions
+		// check it only when not making backjoin on itself - outer condition
+		if ($keyMatches[0]['del'] === '.') {
+			if ($parent === $keyMatches[0]['key']) {
+				return "{$parent}.{$match['column']}";
+			} elseif ($parentAlias === $keyMatches[0]['key']) {
+				return "{$parentAlias}.{$match['column']}";
+			}
 		}
 
 		foreach ($keyMatches as $keyMatch) {
@@ -572,10 +576,14 @@ class SqlBuilder extends Nette\Object
 			}
 
 			$tableAlias = $keyMatch['key'] ?: preg_replace('#^(.*\.)?(.*)$#', '$2', $table);
-			
+
+			// if we are joining itself (parent table), we must alias joining table
+			if ($parent === $table && $table === $tableAlias) {
+				$tableAlias = $parentAlias . '_ref';
+			}
+
 			$addon = $keyMatch['key'] . (isset($keyMatch['throughColumn']) ? $keyMatch['throughColumn'] : '');
-			$joins[$table . $addon . $column] = array($table, $tableAlias, $parentAlias, $column, $primary);
-			
+			$joins[$tableAlias . $addon . $column] = array($table, $tableAlias, $parentAlias, $column, $primary);
 			$parent = $table;
 			$parentAlias = $tableAlias;
 		}
