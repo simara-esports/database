@@ -107,6 +107,7 @@ class Selection extends Nette\Object implements \Iterator, IRowContainer, \Array
 
 	public function __destruct()
 	{
+		umask(0);
 		$this->saveCacheState();
 	}
 
