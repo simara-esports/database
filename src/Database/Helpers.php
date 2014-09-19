@@ -119,10 +119,7 @@ class Helpers
 				return '<i title="Length ' . strlen($param) . ' bytes">&lt;binary&gt;</i>';
 
 			} elseif (is_string($param)) {
-				$length = Nette\Utils\Strings::length($param);
-				$truncated = Nette\Utils\Strings::truncate($param, Helpers::$maxLength);
-				$text = htmlspecialchars($connection ? $connection->quote($truncated) : '\'' . $truncated . '\'');
-				return '<span title="Length ' . $length . ' characters">' . $text . '</span>';
+				return '<span title="Length ' . Nette\Utils\Strings::length($param) . ' characters">' . htmlspecialchars(Nette\Utils\Strings::truncate($param, Helpers::$maxLength)) . "</span>";
 
 			} elseif (is_resource($param)) {
 				$type = get_resource_type($param);
