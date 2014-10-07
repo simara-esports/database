@@ -15,13 +15,13 @@ if (!class_exists('PDO')) {
 }
 
 try {
-	$options = Tester\Environment::loadData() + array('user' => NULL, 'password' => NULL);
+	$options = Tester\Environment::loadData() + array('user' => NULL, 'password' => NULL) + (isset($connectionOptions) ? $connectionOptions : []);
 } catch (Exception $e) {
 	Tester\Environment::skip($e->getMessage());
 }
 
 try {
-	$connection = new Nette\Database\Connection($options['dsn'], $options['user'], $options['password']);
+	$connection = new Nette\Database\Connection($options['dsn'], $options['user'], $options['password'], $options);
 } catch (PDOException $e) {
 	Tester\Environment::skip("Connection to '$options[dsn]' failed. Reason: " . $e->getMessage());
 }

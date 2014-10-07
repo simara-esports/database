@@ -35,3 +35,5 @@ function test(\Closure $function)
 	before();
 	$function();
 }
+
+function id($x){return $x;}
