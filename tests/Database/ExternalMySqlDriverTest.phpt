@@ -109,17 +109,6 @@ WHERE (`post_id` = '3')",
 	private function createEmptyDriver() {
 		return new Nette\Database\Drivers\ExternalMySqlDriver($this->connection, []);
 	}
-
-	public function testDelimiteEmpty() {
-		Assert::null($this->createEmptyDriver()->delimiteExternal(null));
-		Assert::same('', $this->createEmptyDriver()->delimiteExternal(''));
-		Assert::same(' ', $this->createEmptyDriver()->delimiteExternal(' '));
-	}
-	
-	public function testDelimiteSingleWordEmpty() {
-		Assert::same('`post`', $this->createEmptyDriver()->delimiteExternal('`post`'));
-		Assert::same('`x`', $this->createEmptyDriver()->delimiteExternal('`x`'));
-	}
 	
 	public function testDelimiteSqlEmpty() {
 		foreach($this->sqls as $sql){
@@ -141,19 +130,6 @@ WHERE (`post_id` = '3')",
 				],
 			],
 		]);
-	}
-	
-	public function testDelimite() {
-		Assert::null($this->createDriver()->delimiteExternal(null));
-		Assert::same('', $this->createDriver()->delimiteExternal(''));
-		Assert::same(' ', $this->createDriver()->delimiteExternal(' '));
-	}
-	
-	public function testDelimiteSingleWord() {
-		Assert::same('`post`', $this->createDriver()->delimiteExternal('`post`'));
-		Assert::same('`x`', $this->createDriver()->delimiteExternal('`x`'));
-		Assert::same('`ext_db`.`photo`', $this->createDriver()->delimiteExternal('`photo`'));
-		Assert::same('`ext_db`.`stats_league`', $this->createDriver()->delimiteExternal('`stats_league`'));
 	}
 	
 	public function testDelimiteSql() {
