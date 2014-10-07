@@ -13,7 +13,8 @@ use Nette,
 	Nette\Utils\Strings,
 	Nette\Database\IConventions,
 	Nette\Database\Context,
-	Nette\Database\IStructure;
+	Nette\Database\IStructure,
+	Nette\Database\Drivers\ExternalMySqlDriver;
 
 
 /**
@@ -647,9 +648,14 @@ class SqlBuilder extends Nette\Object
 	protected function tryDelimite($s)
 	{
 		$driver = $this->driver;
-		return preg_replace_callback('#(?<=[^\w`"\[]|^)[a-z_][a-z0-9_]*(?=[^\w`"(\]]|\z)#i', function($m) use ($driver) {
+		$delimited = preg_replace_callback('#(?<=[^\w`"\[]|^)[a-z_][a-z0-9_]*(?=[^\w`"(\]]|\z)#i', function($m) use ($driver) {
 			return strtoupper($m[0]) === $m[0] ? $m[0] : $driver->delimite($m[0]);
 		}, $s);
+		
+		if($this->driver instanceof ExternalMySqlDriver){
+			$delimited = $this->driver->delimiteExternal($delimited);
+		}
+		return $delimited;
 	}
 
 
