@@ -57,6 +57,15 @@ WHERE (`post_id` = '3')",
 "SELECT `photo` FROM `stats_league` WHERE `photo` = '' ORDER BY `photo` GROUP BY `photo`",
 "SELECT `photo` FROM `stats_league` GROUP BY `photo`",
 "SELECT `photo` FROM `stats_league` WHERE (`stats_league`.`post_type_id` = 2) AND (`photo` = '2-liga') LIMIT 1",
+		
+"SELECT `stats_competition`.* 
+FROM `stats_competition` 
+LEFT JOIN `stats_category` AS `category` ON
+`stats_competition`.`stats_category_id` = `category`.`id` 
+LEFT JOIN `stats_league` AS `league` ON `stats_competition`.`league_id` = `league`.`id` 
+WHERE (`season` = 2014) AND (`league_id` = 3) AND (`category`.`type` = 'base') AND (`virtual` = 0) 
+ORDER BY `season` DESC, IFNULL(`league`.`rank`, 9223372036854775807), `priority` DESC LIMIT 1",
+
 		];
 	
 	private $sqlsExternal = [
@@ -97,6 +106,14 @@ WHERE (`post_id` = '3')",
 "SELECT `photo` FROM `ext_db`.`stats_league` WHERE `photo` = '' ORDER BY `photo` GROUP BY `photo`",
 "SELECT `photo` FROM `ext_db`.`stats_league` GROUP BY `photo`",
 "SELECT `photo` FROM `ext_db`.`stats_league` WHERE (`ext_db`.`stats_league`.`post_type_id` = 2) AND (`photo` = '2-liga') LIMIT 1",
+		
+"SELECT `ext_db`.`stats_competition`.* 
+FROM `ext_db`.`stats_competition` 
+LEFT JOIN `ext_db`.`stats_category` AS `category` ON
+`ext_db`.`stats_competition`.`stats_category_id` = `category`.`id` 
+LEFT JOIN `ext_db`.`stats_league` AS `league` ON `ext_db`.`stats_competition`.`league_id` = `league`.`id` 
+WHERE (`season` = 2014) AND (`league_id` = 3) AND (`category`.`type` = 'base') AND (`virtual` = 0) 
+ORDER BY `season` DESC, IFNULL(`league`.`rank`, 9223372036854775807), `priority` DESC LIMIT 1",
 		];
 
 	function __construct($connection) {
@@ -125,7 +142,9 @@ WHERE (`post_id` = '3')",
 					[
 					'name' => 'ext_db',
 					'tables' => [
-						'photo', 'file', 'stats_league', 'stats_league_logo'
+						'photo', 'file', 'stats_league', 'stats_league_logo',
+						'stats_competition', 'stats_category', 'stats_league',
+						'season'
 					],
 				],
 			],
