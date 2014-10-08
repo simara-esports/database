@@ -65,6 +65,11 @@ LEFT JOIN `stats_category` AS `category` ON
 LEFT JOIN `stats_league` AS `league` ON `stats_competition`.`league_id` = `league`.`id` 
 WHERE (`season` = 2014) AND (`league_id` = 3) AND (`category`.`type` = 'base') AND (`virtual` = 0) 
 ORDER BY `season` DESC, IFNULL(`league`.`rank`, 9223372036854775807), `priority` DESC LIMIT 1",
+		
+"UPDATE `photo` SET `name`='xxx' WHERE (`photo`.`id` = 1)",
+"INSERT INTO `photo` VALUES (1, 2)",
+"INSERT INTO `photo` (`id`, `season`) VALUES (1, 2)",
+"INSERT INTO `photo` SELECT `id`, `season` FROM `photo`",
 
 		];
 	
@@ -114,6 +119,11 @@ LEFT JOIN `ext_db`.`stats_category` AS `category` ON
 LEFT JOIN `ext_db`.`stats_league` AS `league` ON `ext_db`.`stats_competition`.`league_id` = `league`.`id` 
 WHERE (`season` = 2014) AND (`league_id` = 3) AND (`category`.`type` = 'base') AND (`virtual` = 0) 
 ORDER BY `season` DESC, IFNULL(`league`.`rank`, 9223372036854775807), `priority` DESC LIMIT 1",
+		
+"UPDATE `ext_db`.`photo` SET `name`='xxx' WHERE (`ext_db`.`photo`.`id` = 1)",
+"INSERT INTO `ext_db`.`photo` VALUES (1, 2)",
+"INSERT INTO `ext_db`.`photo` (`id`, `season`) VALUES (1, 2)",
+"INSERT INTO `ext_db`.`photo` SELECT `id`, `season` FROM `ext_db`.`photo`",
 		];
 
 	function __construct($connection) {

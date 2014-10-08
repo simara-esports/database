@@ -91,6 +91,8 @@ class ExternalMySqlDriver extends MySqlDriver {
 		
 		$sql = $this->delimiteTables($sql, 'FROM', ['JOIN', 'WHERE', 'ORDER BY', 'GROUP BY']);
 		$sql = $this->delimiteTables($sql, 'JOIN', ['ON', 'AS']);
+		$sql = $this->delimiteTables($sql, 'UPDATE', ['SET']);
+		$sql = $this->delimiteTables($sql, 'INSERT', ['VALUES', '\(', 'SELECT']);
 		
 		return $sql;
 	}
