@@ -109,7 +109,7 @@ class SqlBuilder extends Nette\Object
 
 	public function buildInsertQuery()
 	{
-		return "INSERT INTO {$this->delimitedTable}";
+		return "INSERT INTO {$this->delimitedTable} ?values";
 	}
 
 
@@ -118,7 +118,7 @@ class SqlBuilder extends Nette\Object
 		if ($this->limit !== NULL || $this->offset) {
 			throw new Nette\NotSupportedException('LIMIT clause is not supported in UPDATE query.');
 		}
-		return $this->tryDelimite("UPDATE {$this->tableName} SET ?" . $this->buildConditions());
+		return $this->tryDelimite("UPDATE {$this->tableName} SET ?set" . $this->buildConditions());
 	}
 
 
