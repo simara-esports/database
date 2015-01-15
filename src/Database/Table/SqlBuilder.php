@@ -109,7 +109,7 @@ class SqlBuilder extends Nette\Object
 
 	public function buildInsertQuery()
 	{
-		return "INSERT INTO {$this->delimitedTable} ?values";
+		return "INSERT INTO {$this->delimitedTable}";
 	}
 
 
