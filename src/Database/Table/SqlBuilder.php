@@ -94,7 +94,7 @@ class SqlBuilder extends Nette\Object
 		$this->conventions = $context->getConventions();
 		$this->structure = $context->getStructure();
 
-		$this->delimitedTable = $this->tryDelimite($tableName);
+		$this->delimitedTable = implode('.', array_map(array($this->driver, 'delimite'), explode('.', $tableName)));
 	}
 
 
@@ -118,7 +118,7 @@ class SqlBuilder extends Nette\Object
 		if ($this->limit !== NULL || $this->offset) {
 			throw new Nette\NotSupportedException('LIMIT clause is not supported in UPDATE query.');
 		}
-		return $this->tryDelimite("UPDATE {$this->tableName} SET ?set" . $this->buildConditions());
+		return "UPDATE {$this->delimitedTable} SET ?set" . $this->tryDelimite($this->buildConditions());
 	}
 
 
@@ -127,7 +127,7 @@ class SqlBuilder extends Nette\Object
 		if ($this->limit !== NULL || $this->offset) {
 			throw new Nette\NotSupportedException('LIMIT clause is not supported in DELETE query.');
 		}
-		return $this->tryDelimite("DELETE FROM {$this->tableName}" . $this->buildConditions());
+		return "DELETE FROM {$this->delimitedTable}" . $this->tryDelimite($this->buildConditions());
 	}
 
 
@@ -174,7 +174,7 @@ class SqlBuilder extends Nette\Object
 		$forceIndex = $this->getForceIndex();
 		
 		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($leftConditions));
-		$query = "{$querySelect} FROM {$this->tableName}{$forceIndex}{$queryJoins}{$queryCondition}{$queryEnd}";
+		$query = "{$querySelect} FROM {$this->delimitedTable}{$forceIndex}{$queryJoins}{$queryCondition}{$queryEnd}";
 
 		if ($this->limit !== NULL || $this->offset) {
 			$this->driver->applyLimit($query, $this->limit, $this->offset);
