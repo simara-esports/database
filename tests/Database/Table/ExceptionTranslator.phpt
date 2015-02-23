@@ -21,7 +21,7 @@ test(function() use ($context) {
 
 	Assert::exception(function () use ($context) {
 		$context
-			->table('book')
+			->table('author')
 			->delete();
 	}, '\Esports\ConstraintViolationException');
 });
