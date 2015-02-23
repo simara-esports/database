@@ -102,6 +102,7 @@ CREATE TABLE product_price (
 	active TINYINT(1) NOT NULL,
 	PRIMARY KEY (id),
 	CONSTRAINT book_product_price FOREIGN KEY (book_id) REFERENCES book (id)
+		ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 INSERT INTO product_price (book_id, value, active) VALUES (1, 1000, 1);
