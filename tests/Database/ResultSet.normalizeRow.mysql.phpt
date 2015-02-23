@@ -22,7 +22,7 @@ Assert::equal( array(
 	'tinyint' => PHP_VERSION_ID < 50417 ? '1' : 1, // PHP bug #48724
 	'mediumint' => 1,
 	'bigint' => 1,
-	'bit' => '1',
+	'bit' => "\x01",
 	'decimal' => 1.0,
 	'decimal2' => 1.1,
 	'float' => 1.0,
@@ -55,7 +55,7 @@ Assert::equal( array(
 	'tinyint' => PHP_VERSION_ID < 50417 ? '0' : 0, // PHP bug #48724
 	'mediumint' => 0,
 	'bigint' => 0,
-	'bit' => '0',
+	'bit' => "\x00",
 	'decimal' => 0.0,
 	'decimal2' => 0.5,
 	'float' => 0.5,
