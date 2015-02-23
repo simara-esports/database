@@ -7,8 +7,7 @@
 
 namespace Nette\Bridges\DatabaseDI;
 
-use Nette,
-	Nette\DI\ContainerBuilder;
+use Nette;
 
 
 /**
@@ -27,8 +26,7 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 		'options' => NULL,
 		'debugger' => TRUE,
 		'explain' => TRUE,
-		'reflection' => NULL, // BC
-		'conventions' => 'discovered', // Nette\Database\Conventions\DiscoveredConventions
+		'reflection' => 'discovered', // Nette\Database\Reflection\DiscoveredReflection
 		'autowired' => NULL,
 	);
 
@@ -71,7 +69,7 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 			$connection = $container->addDefinition($prefix . $this->prefix($name))
 				->setClass('Nette\Database\Connection', array($info['dsn'], $info['user'], $info['password'], $info['options']))
 				->setAutowired($info['autowired'])
-				->addSetup($hasBlueScreenService ? '@nette.blueScreen::addPanel' : 'Tracy\Debugger::getBlueScreen()->addPanel(?)', array(
+				->addSetup('Tracy\Debugger::getBlueScreen()->addPanel(?)', array(
 					'Nette\Bridges\DatabaseTracy\ConnectionPanel::renderException'
 				));
 
