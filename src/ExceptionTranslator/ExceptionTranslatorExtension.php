@@ -13,7 +13,7 @@ class ExceptionTranslatorExtension extends Nette\DI\CompilerExtension {
 
 	public function loadConfiguration() {
 		$builder = $this->getContainerBuilder();
-		$engine = $builder->getDefinition('nette.database.default');
+		$engine = $builder->getDefinition('database.default');
 		$engine->addSetup('Esports\Database\ExceptionTranslator::connect(?)', array('@Nette\Database\Connection'));
 	}
 }
