@@ -436,7 +436,7 @@ class SqlBuilder extends Nette\Object
 	
 	public function setForceIndex($indexName, $table = null) {
 		if(empty($indexName)){
-			throw new \Nette\InvalidArgumentException("Index name can't be empty");
+			$indexName = null;
 		}
 		
 		$this->forceIndexes[$table] = $indexName;
