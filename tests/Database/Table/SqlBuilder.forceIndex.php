@@ -96,16 +96,30 @@ test(function() use ($context){
 test(function() use ($context){
 		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
 		$builder->addSelect('author.*');
-		Assert::exception(function() use ($builder){
-			$builder->setForceIndex([]);
-		}, '\Nette\InvalidArgumentException');
-		
-		Assert::exception(function() use ($builder){
-			$builder->setForceIndex('');
-		}, '\Nette\InvalidArgumentException');
-		
-		Assert::exception(function() use ($builder){
-			$builder->setForceIndex(null);
-		}, '\Nette\InvalidArgumentException');
+		$builder->setForceIndex('nameOfTheForceIndex');
+		$builder->setForceIndex(null);
+		$query = $builder->buildSelectQuery();
+		Assert::same("SELECT `author`.* FROM `author`", $query);
 	}
 );
+
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
+		$builder->addSelect('author.*');
+		$builder->setForceIndex('nameOfTheForceIndex');
+		$builder->setForceIndex('');
+		$query = $builder->buildSelectQuery();
+		Assert::same("SELECT `author`.* FROM `author`", $query);
+	}
+);
+
+test(function() use ($context){
+		$builder = new \Nette\Database\Table\SqlBuilder('author', $context);
+		$builder->addSelect('author.*');
+		$builder->setForceIndex('nameOfTheForceIndex');
+		$builder->setForceIndex([]);
+		$query = $builder->buildSelectQuery();
+		Assert::same("SELECT `author`.* FROM `author`", $query);
+	}
+);
+
