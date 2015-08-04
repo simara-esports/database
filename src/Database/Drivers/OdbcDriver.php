@@ -12,8 +12,6 @@ use Nette;
 
 /**
  * Supplemental ODBC database driver.
- *
- * @author     David Grudl
  */
 class OdbcDriver extends Nette\Object implements Nette\Database\ISupplementalDriver
 {
@@ -51,6 +49,15 @@ class OdbcDriver extends Nette\Object implements Nette\Database\ISupplementalDri
 	public function formatDateTime(/*\DateTimeInterface*/ $value)
 	{
 		return $value->format('#m/d/Y H:i:s#');
+	}
+
+
+	/**
+	 * Formats date-time interval for use in a SQL statement.
+	 */
+	public function formatDateInterval(\DateInterval $value)
+	{
+		throw new Nette\NotSupportedException;
 	}
 
 

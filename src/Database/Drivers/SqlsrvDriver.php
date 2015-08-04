@@ -12,9 +12,6 @@ use Nette;
 
 /**
  * Supplemental SQL Server 2005 and later database driver.
- *
- * @author     David Grudl
- * @author     Miloslav Hůla
  */
 class SqlsrvDriver extends Nette\Object implements Nette\Database\ISupplementalDriver
 {
@@ -63,6 +60,15 @@ class SqlsrvDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	{
 		/** @see http://msdn.microsoft.com/en-us/library/ms187819.aspx */
 		return $value->format("'Y-m-d H:i:s'");
+	}
+
+
+	/**
+	 * Formats date-time interval for use in a SQL statement.
+	 */
+	public function formatDateInterval(\DateInterval $value)
+	{
+		throw new Nette\NotSupportedException;
 	}
 
 

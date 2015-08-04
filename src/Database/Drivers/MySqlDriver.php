@@ -12,8 +12,6 @@ use Nette;
 
 /**
  * Supplemental MySQL database driver.
- *
- * @author     David Grudl
  */
 class MySqlDriver extends Nette\Object implements Nette\Database\ISupplementalDriver
 {
@@ -97,6 +95,15 @@ class MySqlDriver extends Nette\Object implements Nette\Database\ISupplementalDr
 	public function formatDateTime(/*\DateTimeInterface*/ $value)
 	{
 		return $value->format("'Y-m-d H:i:s'");
+	}
+
+
+	/**
+	 * Formats date-time interval for use in a SQL statement.
+	 */
+	public function formatDateInterval(\DateInterval $value)
+	{
+		return $value->format("'%r%h:%I:%S'");
 	}
 
 

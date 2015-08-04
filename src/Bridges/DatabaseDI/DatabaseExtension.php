@@ -12,9 +12,6 @@ use Nette;
 
 /**
  * Nette Framework Database services.
- *
- * @author     David Grudl
- * @author     Jan Skrasek
  */
 class DatabaseExtension extends Nette\DI\CompilerExtension
 {
@@ -25,7 +22,8 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 		'options' => NULL,
 		'debugger' => TRUE,
 		'explain' => TRUE,
-		'reflection' => 'discovered', // Nette\Database\Reflection\DiscoveredReflection
+		'reflection' => NULL, // BC
+		'conventions' => 'discovered', // Nette\Database\Conventions\DiscoveredConventions
 		'autowired' => NULL,
 	);
 
@@ -70,7 +68,7 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 			}
 		}
 
-		$connection = $container->addDefinition($this->prefix($name))
+		$connection = $container->addDefinition($this->prefix("$name.connection"))
 			->setClass('Nette\Database\Connection', array($config['dsn'], $config['user'], $config['password'], $config['options']))
 			->setAutowired($config['autowired']);
 
@@ -119,6 +117,7 @@ class DatabaseExtension extends Nette\DI\CompilerExtension
 		}
 
 		if ($this->name === 'database') {
+			$container->addAlias($this->prefix($name), $this->prefix("$name.connection"));
 			$container->addAlias("nette.database.$name", $this->prefix($name));
 			$container->addAlias("nette.database.$name.context", $this->prefix("$name.context"));
 		}

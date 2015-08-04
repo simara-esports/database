@@ -12,8 +12,6 @@ use Nette;
 
 /**
  * Supplemental SQLite3 database driver.
- *
- * @author     David Grudl
  */
 class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalDriver
 {
@@ -87,6 +85,15 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	public function formatDateTime(/*\DateTimeInterface*/ $value)
 	{
 		return $value->format($this->fmtDateTime);
+	}
+
+
+	/**
+	 * Formats date-time interval for use in a SQL statement.
+	 */
+	public function formatDateInterval(\DateInterval $value)
+	{
+		throw new Nette\NotSupportedException;
 	}
 
 

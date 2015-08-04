@@ -12,8 +12,6 @@ use Nette;
 
 /**
  * SQL preprocessor.
- *
- * @author     David Grudl
  */
 class SqlPreprocessor extends Nette\Object
 {
@@ -50,7 +48,8 @@ class SqlPreprocessor extends Nette\Object
 	public function process($params)
 	{
 		$this->params = $params;
-		$this->counter = 0; $prev = -1;
+		$this->counter = 0;
+		$prev = -1;
 		$this->remaining = array();
 		$this->arrayMode = NULL;
 		$res = array();
@@ -136,14 +135,17 @@ class SqlPreprocessor extends Nette\Object
 			} elseif ($value instanceof Table\IRow) {
 				return $value->getPrimary();
 
-			} elseif ($value instanceof \DateTime || $value instanceof \DateTimeInterface) {
-				return $this->driver->formatDateTime($value);
-
 			} elseif ($value instanceof SqlLiteral) {
 				$prep = clone $this;
 				list($res, $params) = $prep->process(array_merge(array($value->__toString()), $value->getParameters()));
 				$this->remaining = array_merge($this->remaining, $params);
 				return $res;
+
+			} elseif ($value instanceof \DateTime || $value instanceof \DateTimeInterface) {
+				return $this->driver->formatDateTime($value);
+
+			} elseif ($value instanceof \DateInterval) {
+				return $this->driver->formatDateInterval($value);
 
 			} elseif (is_object($value) && method_exists($value, '__toString')) {
 				return $this->formatValue((string) $value);
@@ -178,7 +180,7 @@ class SqlPreprocessor extends Nette\Object
 					}
 					foreach ($value as $val) {
 						$vx2 = array();
-							foreach ($val as $v) {
+						foreach ($val as $v) {
 							$vx2[] = $this->formatValue($v);
 						}
 						$vx[] = implode(', ', $vx2);
@@ -194,14 +196,14 @@ class SqlPreprocessor extends Nette\Object
 				}
 				return '(' . implode(', ', $kx) . ') VALUES (' . implode(', ', $vx) . ')';
 
-			} elseif (!$mode || $mode === 'set') { // key=value, key=value, ...
+			} elseif (!$mode || $mode === 'set') {
 				foreach ($value as $k => $v) {
 					if (is_int($k)) { // value, value, ... OR (1, 2), (3, 4)
 						$vx[] = is_array($v) ? '(' . $this->formatValue($v) . ')' : $this->formatValue($v);
-					} elseif (substr($k, -1) === '=') {
+					} elseif (substr($k, -1) === '=') { // key+=value, key-=value, ...
 						$k2 = $this->delimite(substr($k, 0, -2));
 						$vx[] = $k2 . '=' . $k2 . ' ' . substr($k, -2, 1) . ' ' . $this->formatValue($v);
-					} else {
+					} else { // key=value, key=value, ...
 						$vx[] = $this->delimite($k) . '=' . $this->formatValue($v);
 					}
 				}

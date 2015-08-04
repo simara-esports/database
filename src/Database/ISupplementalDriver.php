@@ -7,13 +7,9 @@
 
 namespace Nette\Database;
 
-use Nette;
-
 
 /**
  * Supplemental PDO database driver.
- *
- * @author     David Grudl
  */
 interface ISupplementalDriver
 {
@@ -48,6 +44,12 @@ interface ISupplementalDriver
 	 * @return string
 	 */
 	function formatDateTime(/*\DateTimeInterface*/ $value);
+
+	/**
+	 * Formats date-time interval for use in a SQL statement.
+	 * @return string
+	 */
+	//function formatDateInterval(\DateInterval $value);
 
 	/**
 	 * Encodes string for use in a LIKE statement.

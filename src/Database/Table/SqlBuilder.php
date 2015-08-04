@@ -7,22 +7,18 @@
 
 namespace Nette\Database\Table;
 
-use Nette,
-	Nette\Database\ISupplementalDriver,
-	Nette\Database\SqlLiteral,
-	Nette\Utils\Strings,
-	Nette\Database\IConventions,
-	Nette\Database\Context,
-	Nette\Database\IStructure,
-	Nette\Database\Drivers\ExternalMySqlDriver;
-
+use Nette;
+use Nette\Database\ISupplementalDriver;
+use Nette\Database\SqlLiteral;
+use Nette\Database\IConventions;
+use Nette\Database\Context;
+use Nette\Database\IStructure;
+use Nette\Utils\Strings;
+use Nette\Database\Drivers\ExternalMySqlDriver;
 
 /**
  * Builds SQL query.
  * SqlBuilder is based on great library NotORM http://www.notorm.com written by Jakub Vrana.
- *
- * @author     Jakub Vrana
- * @author     Jan Skrasek
  */
 class SqlBuilder extends Nette\Object
 {
@@ -74,7 +70,7 @@ class SqlBuilder extends Nette\Object
 	protected $having = '';
 
 	protected $aliases = array();
-	
+
 	/** @var array */
 	protected $forceIndexes = array();
 
@@ -139,7 +135,7 @@ class SqlBuilder extends Nette\Object
 	public function buildSelectQuery($columns = NULL)
 	{
 		$queryCondition = $this->buildConditions();
-		$queryEnd       = $this->buildQueryEnd();
+		$queryEnd = $this->buildQueryEnd();
 		$leftConditions = $this->left;
 
 		$joins = array();
@@ -170,9 +166,9 @@ class SqlBuilder extends Nette\Object
 			$querySelect = $this->buildSelect(array($prefix . '*'));
 
 		}
-		
+
 		$forceIndex = $this->getForceIndex();
-		
+
 		$queryJoins = $this->buildQueryJoins($joins, $this->buildLeftJoinConditions($leftConditions));
 		$query = "{$querySelect} FROM {$this->delimitedTable}{$forceIndex}{$queryJoins}{$queryCondition}{$queryEnd}";
 
@@ -305,7 +301,7 @@ class SqlBuilder extends Nette\Object
 					if ($this->driver->isSupported(ISupplementalDriver::SUPPORT_SUBSELECT)) {
 						$arg = NULL;
 						$replace = $match[2][0] . '(' . $clone->getSql() . ')';
-						$this->parameters[$method] = array_merge($this->parameters[$method], $clone->getSqlBuilder()->parameters[$method]);
+						$this->parameters[$method] = array_merge($this->parameters[$method], $clone->getSqlBuilder()->getParameters());
 					} else {
 						$arg = array();
 						foreach ($clone as $row) {
@@ -361,11 +357,11 @@ class SqlBuilder extends Nette\Object
 	 * Add alias
 	 * @param string $table
 	 * @param string $alias
-	 * @throws \Nette\InvalidArgumentException
+	 * @throws Nette\InvalidArgumentException
 	 */
 	public function addAlias($table, $alias) {
 		if(isset($this->aliases[$alias])){
-			throw new \Nette\InvalidArgumentException("Alias '$alias' is already used");
+			throw new Nette\InvalidArgumentException("Alias '$alias' is already used");
 		}
 		$this->aliases[$alias] = $table;
 	}
@@ -440,22 +436,22 @@ class SqlBuilder extends Nette\Object
 	{
 		return $this->having;
 	}
-	
+
 	public function setForceIndex($indexName, $table = null) {
 		if(empty($indexName)){
 			$indexName = null;
 		}
-		
+
 		$this->forceIndexes[$table] = $indexName;
 	}
-	
+
 	public function getForceIndex($table = null) {
 		if(!isset($this->forceIndexes[$table])){
 			return null;
 		}
-		
+
 		$index = implode(', ', (array)$this->forceIndexes[$table]);
-		
+
 		return " FORCE INDEX ($index)";
 	}
 
@@ -478,23 +474,23 @@ class SqlBuilder extends Nette\Object
 				(?P<node> (?&del)? (?&word) (\((?&word)\))? )
 			)
 			(?P<chain> (?!\.) (?&node)*)  \. (?P<column> (?&word) | \*  )
-		~xi', function($match) use (& $joins, $builder) {
+		~xi', function ($match) use (& $joins, $builder) {
 			return $builder->parseJoinsCb($joins, $match);
 		}, $query);
 	}
 
 	/**
 	 * Rozparsuje jeden alias, prida joiny do $joins
-	 * 
+	 *
 	 * @param array $joins
 	 * @param string $aliasKey klic v poli $this->aliases
 	 * @param string $aliasDelimiter
 	 * @return array
-	 * @throws \Nette\InvalidArgumentException
+	 * @throws Nette\InvalidArgumentException
 	 */
 	protected function parseAlias(& $joins, $aliasKey, $aliasDelimiter) {
 		if($aliasDelimiter !== '.'){
-			throw new \Nette\InvalidArgumentException("Bad syntax when using alias. There cannot be ':$aliasKey...', must be '$aliasKey...'");
+			throw new Nette\InvalidArgumentException("Bad syntax when using alias. There cannot be ':$aliasKey...', must be '$aliasKey...'");
 		}
 		$query = $aliasDelimiter . $this->aliases[$aliasKey] . ".x";
 		$tmp = array();
@@ -662,11 +658,12 @@ class SqlBuilder extends Nette\Object
 	protected function tryDelimite($s)
 	{
 		$driver = $this->driver;
+
 		$delimited = preg_replace_callback('#(?<=[^\w`"\[?]|^)[a-z_][a-z0-9_]*(?=[^\w`"(\]]|\z)#i', function($m) use ($driver) {
 			return strtoupper($m[0]) === $m[0] ? $m[0] : $driver->delimite($m[0]);
 		}, $s);
-		
-		if($this->driver instanceof ExternalMySqlDriver){
+
+		if ($this->driver instanceof ExternalMySqlDriver){
 			$delimited = $this->driver->delimiteExternal($delimited);
 		}
 		return $delimited;
@@ -683,7 +680,7 @@ class SqlBuilder extends Nette\Object
 			return $this->addWhere('(' . implode(', ', $columns) . ') IN', $parameters);
 		}
 	}
-	
+
 	/**
 	 * Odstrani vsechny podminky na left join i jejich parametry
 	 */
