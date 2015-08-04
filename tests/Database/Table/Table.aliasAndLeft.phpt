@@ -82,8 +82,8 @@ test(function() use ($context){
 		->left(':product_price.active', 1)
 		->left(':book_tag.tag_id IS NOT NULL OR :product_price.active IS NOT NULL')
 		->select('book.*, :product_price.value')->getSql();
-	
-	Assert::same('SELECT `book`.*, `product_price`.`value` FROM `book`'
-		. ' LEFT JOIN `product_price` ON `book`.`id` = `product_price`.`book_id` AND (`product_price`.`active` = ?)'
-		. ' LEFT JOIN `book_tag` ON `book`.`id` = `book_tag`.`book_id` AND (`book_tag`.`tag_id` IS NOT NULL OR `product_price`.`active` IS NOT NULL)', $sql);
+
+	Assert::same(reformat('SELECT [book].*, [product_price].[value] FROM [book]'
+		. ' LEFT JOIN [product_price] ON [book].[id] = [product_price].[book_id] AND ([product_price].[active] = ?)'
+		. ' LEFT JOIN [book_tag] ON [book].[id] = [book_tag].[book_id] AND ([book_tag].[tag_id] IS NOT NULL OR [product_price].[active] IS NOT NULL)'), $sql);
 });

@@ -91,3 +91,15 @@ CREATE TABLE note (
 	note varchar(100),
 	CONSTRAINT note_book FOREIGN KEY (book_id) REFERENCES book (id)
 );
+
+CREATE TABLE product_price (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	book_id INTEGER NOT NULL,
+	value INTEGER NOT NULL,
+	active TINYINT(1) NOT NULL,
+	CONSTRAINT book_product_price FOREIGN KEY (book_id) REFERENCES book (id) ON DELETE CASCADE
+);
+
+INSERT INTO product_price (book_id, value, active) VALUES (1, 1000, 1);
+INSERT INTO product_price (book_id, value, active) VALUES (2, 500, 1);
+INSERT INTO product_price (book_id, value, active) VALUES (3, 666, 0);

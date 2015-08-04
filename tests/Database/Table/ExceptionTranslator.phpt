@@ -11,6 +11,9 @@ require __DIR__ . '/../connect.inc.php'; // create $connection
 
 Nette\Database\Helpers::loadFromFile($connection, __DIR__ . "/../files/{$driverName}-nette_test1.sql");
 
+if ($driverName !== "mysql") {
+	Tester\Environment::skip("This test is only for MySQL");
+}
 
 test(function() use ($context) {
 	$connection = $context->getConnection();
