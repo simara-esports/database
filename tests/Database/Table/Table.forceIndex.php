@@ -1,8 +1,6 @@
 <?php
 
 /**
- *
- * @author     Svaťa Šimara
  * @dataProvider? ../databases.ini
  */
 

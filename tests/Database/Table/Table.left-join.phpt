@@ -2,8 +2,6 @@
 
 /**
  * Test: Nette\Database\Table: Join.
- *
- * @author     Svaťa Šimara
  * @dataProvider? ../databases.ini
  */
 

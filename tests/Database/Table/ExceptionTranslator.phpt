@@ -2,8 +2,6 @@
 
 /**
  * Test: Esports\Database\ExceptionTranslator: translate exception
- *
- * @author Petr Hlavac
  * @dataProvider? ../databases.ini
  */
 

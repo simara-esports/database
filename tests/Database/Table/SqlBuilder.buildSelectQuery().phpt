@@ -1,7 +1,6 @@
 <?php
 
-/** *
- * @author     Svaťa
+/**
  * @dataProvider? ../databases.ini
  */
 
