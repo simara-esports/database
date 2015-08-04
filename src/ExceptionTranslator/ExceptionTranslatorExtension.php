@@ -6,8 +6,6 @@ use Nette;
 
 /**
  * Rozsireni pro ExceptionTranslator
- *
- * @author Svaťa
  */
 class ExceptionTranslatorExtension extends Nette\DI\CompilerExtension {
 

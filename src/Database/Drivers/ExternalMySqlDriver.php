@@ -4,8 +4,6 @@ namespace Nette\Database\Drivers;
 
 /**
  * MySqlDriver supports external tables
- *
- * @author Svaťa
  */
 class ExternalMySqlDriver extends MySqlDriver {
 	

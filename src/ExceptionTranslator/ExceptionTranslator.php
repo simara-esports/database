@@ -11,8 +11,6 @@ use PDOException;
 
 /**
  * Description of DatabaseExceptionTranslator
- *
- * @author Svaťa
  */
 class ExceptionTranslator extends Object {
 
