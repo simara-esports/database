@@ -287,15 +287,4 @@ class PgSqlDriver extends Nette\Object implements Nette\Database\ISupplementalDr
 		return implode('.', array_map(array($this, 'delimite'), explode('.', $name)));
 	}
 
-
-	/**
-	 * Converts: schema.name => "schema"."name"
-	 * @param  string
-	 * @return string
-	 */
-	private function delimiteFQN($name)
-	{
-		return implode('.', array_map(array($this, 'delimite'), explode('.', $name)));
-	}
-
 }
