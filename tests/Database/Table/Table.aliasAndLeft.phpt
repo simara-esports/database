@@ -20,7 +20,7 @@ test(function() use ($context) {
 		->getSql();
 	Assert::same(reformat(
 		'SELECT [book].* FROM [book] '
-		. 'LEFT JOIN [author] AS [trans] ON [book].[translator_id] = [trans].[id] AND ([trans].[name] = ?)'), $sql);
+		. 'LEFT JOIN [author] [trans] ON [book].[translator_id] = [trans].[id] AND ([trans].[name] = ?)'), $sql);
 });
 
 test(function() use ($context){
@@ -33,7 +33,7 @@ test(function() use ($context){
 	Assert::same(reformat(
 		'SELECT [book].*, [pp].[value]'
 		. ' FROM [book]'
-		. ' LEFT JOIN [product_price] AS [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ?)'), $sql);
+		. ' LEFT JOIN [product_price] [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ?)'), $sql);
 });
 
 test(function() use ($context){
@@ -46,7 +46,7 @@ test(function() use ($context){
 	Assert::same(reformat(
 		'SELECT [book].*, [product_price].[value]'
 		. ' FROM [book]'
-		. ' LEFT JOIN [product_price] AS [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ?)'
+		. ' LEFT JOIN [product_price] [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ?)'
 		. ' LEFT JOIN [product_price] ON [book].[id] = [product_price].[book_id]'), $sql);
 });
 
@@ -62,8 +62,8 @@ test(function() use ($context){
 	Assert::same(reformat(
 		'SELECT [book].*, [pp].[value] FROM [book]'
 		. ' LEFT JOIN [book_tag] ON [book].[id] = [book_tag].[book_id] AND ([book_tag].[tag_id] IS NOT NULL)'
-		. ' LEFT JOIN [tag] AS [t] ON [book_tag].[tag_id] = [t].[id]'
-		. ' LEFT JOIN [product_price] AS [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ? AND [pp].[value] > ?)'
+		. ' LEFT JOIN [tag] [t] ON [book_tag].[tag_id] = [t].[id]'
+		. ' LEFT JOIN [product_price] [pp] ON [book].[id] = [pp].[book_id] AND ([pp].[active] = ? AND [pp].[value] > ?)'
 		. ' WHERE ([t].[name] LIKE ?)'), $sql);
 });
 

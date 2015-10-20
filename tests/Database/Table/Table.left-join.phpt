@@ -14,7 +14,7 @@ Nette\Database\Helpers::loadFromFile($connection, __DIR__ . "/../files/{$driverN
 
 test(function() use ($context) {
 	$sql = $context->table('book')->left('translator.name', 'Geek')->select('book.*')->getSql();
-	Assert::same(reformat('SELECT [book].* FROM [book] LEFT JOIN [author] AS [translator] ON [book].[translator_id] = [translator].[id] AND ([translator].[name] = ?)'), $sql);
+	Assert::same(reformat('SELECT [book].* FROM [book] LEFT JOIN [author] [translator] ON [book].[translator_id] = [translator].[id] AND ([translator].[name] = ?)'), $sql);
 });
 
 test(function() use ($context){

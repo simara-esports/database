@@ -52,8 +52,8 @@ test(function() use ($context){
 
 	$join = $authorSqlBuilder->buildQueryJoins($joins);
 	Assert::same(
-		'LEFT JOIN book AS bok ON author.id = bok.translator_id LEFT JOIN book ON author.id = book.author_id'
-		. ' LEFT JOIN book_tag AS bok2 ON book.id = bok2.book_id LEFT JOIN tag ON bok2.tag_id = tag.id',
+		'LEFT JOIN book bok ON author.id = bok.translator_id LEFT JOIN book ON author.id = book.author_id'
+		. ' LEFT JOIN book_tag bok2 ON book.id = bok2.book_id LEFT JOIN tag ON bok2.tag_id = tag.id',
 		trim($join)
 	);
 });
@@ -68,10 +68,10 @@ test(function() use ($context){
 	$bookSqlBuilder->parseJoins($bookJoins, $bookQuery);
 	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
 	Assert::same(
-		'LEFT JOIN author AS aut ON book.author_id = aut.id'
+		'LEFT JOIN author aut ON book.author_id = aut.id'
 		. ' LEFT JOIN book ON aut.id = book.author_id'
 		. ' LEFT JOIN author ON book.author_id = author.id'
-		. ' LEFT JOIN book AS trans ON author.id = trans.translator_id',
+		. ' LEFT JOIN book trans ON author.id = trans.translator_id',
 		trim($join)
 	);
 });
@@ -91,7 +91,7 @@ test(function() use ($context){
 		'LEFT JOIN book_tag ON book.id = book_tag.book_id'
 		. ' LEFT JOIN tag ON book_tag.tag_id = tag.id'
 		. ' LEFT JOIN book_tag_alt ON tag.id = book_tag_alt.tag_id'
-		. ' LEFT JOIN book AS book2 ON book_tag_alt.book_id = book2.id',
+		. ' LEFT JOIN book book2 ON book_tag_alt.book_id = book2.id',
 		trim($join)
 	);
 });
@@ -114,12 +114,12 @@ test(function() use ($context){
 
 	Assert::same(
 		'LEFT JOIN book_tag ON book.id = book_tag.book_id'
-			. ' LEFT JOIN tag AS tagAlias ON book_tag.tag_id = tagAlias.id'
-			. ' LEFT JOIN book_tag_alt AS btaAlias ON tagAlias.id = btaAlias.tag_id'
-			. ' LEFT JOIN tag AS tag2Alias ON book_tag.tag_id = tag2Alias.id'
-			. ' LEFT JOIN book_tag_alt AS bta2Alias ON tag2Alias.id = bta2Alias.tag_id'
-			. ' LEFT JOIN book AS bookAlias ON btaAlias.book_id = bookAlias.id'
-			. ' LEFT JOIN book AS book2Alias ON bta2Alias.book_id = book2Alias.id',
+			. ' LEFT JOIN tag tagAlias ON book_tag.tag_id = tagAlias.id'
+			. ' LEFT JOIN book_tag_alt btaAlias ON tagAlias.id = btaAlias.tag_id'
+			. ' LEFT JOIN tag tag2Alias ON book_tag.tag_id = tag2Alias.id'
+			. ' LEFT JOIN book_tag_alt bta2Alias ON tag2Alias.id = bta2Alias.tag_id'
+			. ' LEFT JOIN book bookAlias ON btaAlias.book_id = bookAlias.id'
+			. ' LEFT JOIN book book2Alias ON bta2Alias.book_id = book2Alias.id',
 		trim($join)
 	);
 });
@@ -138,10 +138,10 @@ test(function() use ($context){
 	$join = $bookSqlBuilder->buildQueryJoins($bookJoins);
 
 	Assert::same(
-		'LEFT JOIN book_tag AS btAlias ON book.id = btAlias.book_id'
+		'LEFT JOIN book_tag btAlias ON book.id = btAlias.book_id'
 			. ' LEFT JOIN tag ON btAlias.tag_id = tag.id'
-			. ' LEFT JOIN book_tag_alt AS btaAlias ON tag.id = btaAlias.tag_id'
-			. ' LEFT JOIN book AS bookAlias ON btaAlias.book_id = bookAlias.id',
+			. ' LEFT JOIN book_tag_alt btaAlias ON tag.id = btaAlias.tag_id'
+			. ' LEFT JOIN book bookAlias ON btaAlias.book_id = bookAlias.id',
 		trim($join)
 	);
 });
