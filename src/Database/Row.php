@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Database;
@@ -18,7 +18,8 @@ class Row extends Nette\Utils\ArrayHash implements IRow
 
 	public function __get($key)
 	{
-		throw new Nette\MemberAccessException("Cannot read an undeclared column '$key'.");
+		$hint = Nette\Utils\ObjectMixin::getSuggestion(array_keys((array) $this), $key);
+		throw new Nette\MemberAccessException("Cannot read an undeclared column '$key'" . ($hint ? ", did you mean '$hint'?" : '.'));
 	}
 
 

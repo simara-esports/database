@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Database\Table;
@@ -199,6 +199,12 @@ class GroupedSelection extends Selection
 		if (isset($referencing[$hash]['data'][$this->active])) {
 			$this->data = & $referencing[$hash]['data'][$this->active];
 		}
+	}
+
+
+	protected function emptyResultSet($saveCache = TRUE, $deleteRererencedCache = TRUE)
+	{
+		parent::emptyResultSet($saveCache, FALSE);
 	}
 
 

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Database;
@@ -62,8 +62,8 @@ interface ISupplementalDriver
 	/**
 	 * Injects LIMIT/OFFSET to the SQL query.
 	 * @param  string  SQL query that will be modified.
-	 * @param  int
-	 * @param  int
+	 * @param  int|NULL
+	 * @param  int|NULL
 	 * @return void
 	 */
 	function applyLimit(& $sql, $limit, $offset);
