@@ -61,6 +61,10 @@ if (!in_array($tables[0]['name'], array('npriorities', 'ntopics', 'nusers', 'nus
 
 Nette\Database\Helpers::loadFromFile($connection, __DIR__ . "/../files/{$driverName}-nette_test1.sql");
 
+$structure = new Nette\Database\Structure($connection, $cacheMemoryStorage);
+$conventions = new Nette\Database\Conventions\DiscoveredConventions($structure);
+$context = new Nette\Database\Context($connection, $structure, $conventions, $cacheMemoryStorage);
+
 $sqlBuilder = new SqlBuilderMock('author', $context);
 
 $joins = array();
